@@ -401,6 +401,18 @@ body.loading::before {
 
 /* ===== Day event list (inside day modal) ===== */
 .day-event-list { margin-top: 12px; display: flex; flex-direction: column; }
+.day-event-thumb-wrap { position: relative; width: 100%; }
+.day-event-thumb-wrap .day-event-thumb { width: 100%; display: block; }
+.day-event-thumb-hint {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 0;
+  pointer-events: none;
+}
 .day-event-list .list-item { padding: 10px 0; }
 
 /* ===== Detail modal content ===== */

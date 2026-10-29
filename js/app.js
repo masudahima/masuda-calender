@@ -482,12 +482,19 @@ function buildDayEventRow(ev) {
 
   const imgs = getImages(ev);
   if (imgs.length > 0) {
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'day-event-thumb-wrap';
     const img = document.createElement('img');
     img.className = 'day-event-thumb';
     img.src = imgs[0];
     img.alt = ev.title;
     img.loading = 'lazy';
-    row.appendChild(img);
+    imgWrap.appendChild(img);
+    const hint = document.createElement('span');
+    hint.className = 'day-event-thumb-hint';
+    hint.textContent = 'タップして詳細を見る';
+    imgWrap.appendChild(hint);
+    row.appendChild(imgWrap);
   }
 
   const info = document.createElement('div');
