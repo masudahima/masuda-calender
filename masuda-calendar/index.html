@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>益田市・萩市・浜田市・津和野町 イベントカレンダー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="img/icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="img/icon.png">
+</head>
+<body>
+
+  <!-- ナビゲーションドロワー -->
+  <div id="drawer-overlay" class="drawer-overlay" hidden></div>
+  <nav id="nav-drawer" class="nav-drawer" hidden aria-label="ナビゲーション">
+    <div class="drawer-header">
+      <span class="drawer-title">メニュー</span>
+      <button id="drawer-close" class="drawer-close" aria-label="閉じる">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <ul class="drawer-list">
+      <li><button class="drawer-item" data-action="agenda">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        イベント一覧（リスト）
+      </button></li>
+      <li class="drawer-section-label">益田市近隣のニュース</li>
+      <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="all">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/></svg>
+        すべてのニュース
+      </button></li>
+      <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="masuda">益田市のニュース</button></li>
+      <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="hamada">浜田市のニュース</button></li>
+      <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="tsuwano">津和野町のニュース</button></li>
+    </ul>
+  </nav>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="メニューを開く" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <img src="img/icon.png" alt="" class="site-icon" aria-hidden="true">
+        <div class="header-title-wrap">
+          <h1 class="site-title">益田市（萩市・浜田市・津和野町）イベントカレンダー</h1>
+          <p class="site-sub">島根県西部、萩石見の地域情報</p>
+        </div>
+        <div id="auth-area">
+          <button id="logout-btn" class="btn btn-ghost btn-sm" hidden>ログアウト</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 古いデータ削除バナー -->
+  <div id="cleanup-banner" class="cleanup-banner" hidden>
+    <div class="container">
+      <p>先月以前のデータが <span id="cleanup-count">0</span> 件あります。削除前にエクスポートをお勧めします。</p>
+      <div class="cleanup-actions">
+        <button id="cleanup-export-btn" class="btn btn-outline btn-sm">JSONエクスポート</button>
+        <button id="cleanup-delete-btn" class="btn btn-danger-outline btn-sm">画像ごと削除</button>
+        <button id="cleanup-later-btn"  class="btn btn-ghost btn-sm">後で</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- カレンダー（常時表示） -->
+      <section class="section calendar-section" aria-label="月カレンダー">
+        <div class="calendar-nav">
+          <button id="prev-month" class="nav-btn" aria-label="前の月">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <h2 id="calendar-title">…</h2>
+          <button id="next-month" class="nav-btn" aria-label="次の月">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="calendar-wrapper">
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
+          </div>
+          <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="カレンダー"></div>
+        </div>
+      </section>
+
+      <!-- イベント一覧（横スクロールカード） -->
+      <section class="latest-section" aria-label="イベント一覧">
+        <div class="latest-heading">
+          <span class="latest-en">EVENTS</span>
+          <span class="latest-ja">イベント一覧</span>
+        </div>
+        <div id="latest-scroll" class="latest-scroll"></div>
+      </section>
+
+      <!-- ニュースセクション（常時表示） -->
+      <section id="news-section" class="news-section" aria-label="地域のニュース">
+        <div class="news-heading">
+          <span class="news-en">NEWS</span>
+          <span class="news-ja">地域のニュース</span>
+        </div>
+        <div class="sub-tab-bar">
+          <button class="sub-tab-btn active" data-area="all">すべて<span class="sub-tab-note">（3件）</span></button>
+          <button class="sub-tab-btn" data-area="masuda">益田市</button>
+          <button class="sub-tab-btn" data-area="hamada">浜田市</button>
+          <button class="sub-tab-btn" data-area="tsuwano">津和野町</button>
+        </div>
+        <div id="news-all-list"     class="news-grid sub-tab-panel"></div>
+        <div id="news-masuda-list"  class="news-grid sub-tab-panel" hidden></div>
+        <div id="news-hamada-list"  class="news-grid sub-tab-panel" hidden></div>
+        <div id="news-tsuwano-list" class="news-grid sub-tab-panel" hidden></div>
+      </section>
+
+      <!-- 管理者ツールバー -->
+      <div id="admin-toolbar" class="admin-toolbar" hidden>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer-bottom">
+    <div class="container">
+      <p class="footer-copy">&copy; 益田市（萩市・浜田市・津和野町）イベントカレンダー</p>
+      <a href="privacy.html" class="footer-link">プライバシーポリシー</a>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       MODALS
+  ============================================================ -->
+
+  <!-- アジェンダ（テキストカレンダー）-->
+  <div id="agenda-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="agenda-modal-title">
+    <div class="modal-overlay" id="agenda-modal-overlay"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="agenda-modal-title" class="modal-title">イベント一覧</h2>
+        <button class="modal-close" id="agenda-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="agenda-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 日付パネル -->
+  <div id="day-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="day-modal-title">
+    <div class="modal-overlay" id="day-modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="day-modal-title" class="modal-title"></h2>
+        <button class="modal-close" id="day-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button id="day-register-btn" class="btn btn-primary btn-full">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          イベント登録
+        </button>
+        <div id="day-modal-events" class="day-event-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 詳細モーダル -->
+  <div id="detail-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+    <div class="modal-overlay" id="detail-modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="detail-modal-title" class="modal-title">詳細</h2>
+        <button class="modal-close" id="detail-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="detail-body" class="modal-body detail-body"></div>
+    </div>
+  </div>
+
+  <!-- パスワード確認ダイアログ -->
+  <div id="password-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="pw-modal-h">
+    <div class="modal-overlay" id="password-modal-overlay"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h2 id="pw-modal-h" class="modal-title">イベント登録パスワード</h2>
+        <button class="modal-close" id="pw-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="pw-input" class="sr-only">パスワード</label>
+          <input type="password" id="pw-input" placeholder="パスワードを入力" autocomplete="current-password">
+        </div>
+        <div id="pw-error" class="form-error" hidden role="alert"></div>
+        <div class="form-actions">
+          <button type="button" id="pw-cancel" class="btn btn-outline">キャンセル</button>
+          <button type="button" id="pw-submit" class="btn btn-primary">ログイン</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- イベント登録・編集フォーム -->
+  <div id="event-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="event-modal-h">
+    <div class="modal-overlay" id="event-modal-overlay"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="event-modal-h" class="modal-title">イベント登録</h2>
+        <button class="modal-close" id="event-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="event-form" novalidate>
+
+          <div class="form-group">
+            <label for="ev-date">日付</label>
+            <input type="date" id="ev-date" class="readonly-input" readonly tabindex="-1">
+          </div>
+
+          <div class="form-group">
+            <label for="ev-title">タイトル <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="ev-title" required placeholder="イベント名">
+          </div>
+
+          <div class="form-group">
+            <label for="ev-place">場所</label>
+            <input type="text" id="ev-place" placeholder="会場名・地名">
+          </div>
+
+          <div class="form-group">
+            <label for="ev-comment">コメント</label>
+            <textarea id="ev-comment" rows="4" placeholder="見どころや説明など"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="ev-link">関連リンクURL</label>
+            <input type="url" id="ev-link" placeholder="https://">
+          </div>
+
+          <div class="form-group">
+            <label for="ev-area">エリア</label>
+            <select id="ev-area">
+              <option value="">選択してください</option>
+              <option value="市街地">市街地（益田市）</option>
+              <option value="美都">美都（益田市）</option>
+              <option value="匹見">匹見（益田市）</option>
+              <option value="浜田市">浜田市</option>
+              <option value="津和野">津和野町</option>
+              <option value="その他">その他（萩市など）</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>画像 <span class="required" aria-hidden="true">*</span><span class="label-note">（複数可）</span></label>
+            <div class="image-upload-area" id="image-upload-area">
+              <input type="file" id="ev-images" accept="image/*" multiple class="sr-only">
+              <div id="image-previews" class="image-previews"></div>
+              <label for="ev-images" class="image-add-label" id="image-add-label">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                <span>画像を追加</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-checks">
+            <label class="check-label">
+              <input type="checkbox" id="ev-is-news">
+              <span>ニュースとして掲載</span>
+            </label>
+            <label class="check-label">
+              <input type="checkbox" id="ev-posted">
+              <span>ストーリー掲載済み</span>
+            </label>
+          </div>
+
+          <div id="event-form-error" class="form-error" hidden role="alert"></div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-event" class="btn btn-outline">やめる</button>
+            <button type="submit"  id="save-event"   class="btn btn-primary">登録する</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- インポートモーダル -->
+  <div id="import-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="import-modal-h">
+    <div class="modal-overlay" id="import-modal-overlay"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="import-modal-h" class="modal-title">JSONインポート</h2>
+        <button class="modal-close" id="import-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="import-note">
+          ec_data_v3形式と配列形式の両方に対応しています。
+        </p>
+        <div class="form-group">
+          <label for="import-json">JSONテキスト</label>
+          <textarea id="import-json" rows="10" placeholder='{"2024-10-15": [{"title": "イベント名", ...}]}'></textarea>
+        </div>
+        <div id="import-error" class="form-error" hidden role="alert"></div>
+        <div id="import-preview-area" class="import-preview" hidden></div>
+        <div class="form-actions">
+          <button type="button" id="import-cancel"      class="btn btn-outline">キャンセル</button>
+          <button type="button" id="import-preview-btn" class="btn btn-outline">プレビュー</button>
+          <button type="button" id="import-execute-btn" class="btn btn-primary" hidden>インポート実行</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ライトボックス -->
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="画像拡大">
+    <button id="lightbox-close" class="lightbox-close" aria-label="閉じる">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="lightbox-imgs" class="lightbox-imgs"></div>
+  </div>
+
+  <!-- トースト -->
+  <div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
+  <script src="js/admin.js?v=2"></script>
+</body>
+</html>
