@@ -155,17 +155,17 @@ function renderCalendar(year, month) {
     if (evs.length > 0) {
       const dotsWrap = document.createElement('div');
       dotsWrap.className = 'day-dots';
-      if (evs.length <= 3) {
-        for (let i = 0; i < evs.length; i++) {
-          const dot = document.createElement('span');
-          dot.className = 'day-dot';
-          dotsWrap.appendChild(dot);
-        }
-      } else {
-        const badge = document.createElement('span');
-        badge.className = 'day-dot-count';
-        badge.textContent = evs.length;
-        dotsWrap.appendChild(badge);
+      const showDots = Math.min(evs.length, 3);
+      for (let i = 0; i < showDots; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'day-dot';
+        dotsWrap.appendChild(dot);
+      }
+      if (evs.length > 3) {
+        const plus = document.createElement('span');
+        plus.className = 'day-dot-plus';
+        plus.textContent = '+';
+        dotsWrap.appendChild(plus);
       }
       cell.appendChild(dotsWrap);
     }
