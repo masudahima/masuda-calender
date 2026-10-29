@@ -120,10 +120,10 @@ function renderCalendar(year, month) {
   const firstDow = new Date(year, month, 1).getDay();
   const lastDay  = new Date(year, month + 1, 0).getDate();
 
-  // 月内イベントを日付でグループ化
+  // 月内イベント（ニュース除く）を日付でグループ化
   const byDate = {};
   for (const ev of allEvents) {
-    if (ev.date.startsWith(prefix)) {
+    if (!ev.is_news && ev.date.startsWith(prefix)) {
       (byDate[ev.date] = byDate[ev.date] || []).push(ev);
     }
   }
@@ -164,7 +164,10 @@ function renderCalendar(year, month) {
       cell.appendChild(dotsWrap);
     }
 
-    cell.addEventListener('click', () => openDayModal(dateStr));
+    if (evs.length > 0) {
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', () => openDayModal(dateStr));
+    }
     grid.appendChild(cell);
   }
 }
