@@ -316,6 +316,8 @@ function buildListItem(ev) {
 // ===================================================================
 //  ニュース（益田 / 浜田市 / 津和野 分離）
 // ===================================================================
+const STORE_KEYWORDS = /オープン|新店舗|開店|グランドオープン|OPEN/i;
+
 function renderNews() {
   const newsEvs = allEvents.filter(ev => ev.is_news);
 
@@ -327,20 +329,26 @@ function renderNews() {
     .filter(ev => ev.date >= cutoffStr)
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  const masuda  = recent.filter(ev => ev.area !== '津和野' && ev.area !== '浜田市');
-  const hamada  = recent.filter(ev => ev.area === '浜田市');
-  const tsuwano = recent.filter(ev => ev.area === '津和野');
+  const masuda   = recent.filter(ev => ev.area !== '津和野' && ev.area !== '浜田市');
+  const hamada   = recent.filter(ev => ev.area === '浜田市');
+  const tsuwano  = recent.filter(ev => ev.area === '津和野');
+  const shintenpo = recent.filter(ev => STORE_KEYWORDS.test(ev.title + (ev.comment || '')));
 
   // サブタブ「すべて」の件数を更新
   const allBtn = document.querySelector('.sub-tab-btn[data-area="all"]');
   if (allBtn) allBtn.innerHTML = `すべて<span class="sub-tab-note">（${recent.length}件）</span>`;
 
-  const allList     = document.getElementById('news-all-list');
-  const masudaList  = document.getElementById('news-masuda-list');
-  const hamadaList  = document.getElementById('news-hamada-list');
-  const tsuwanoList = document.getElementById('news-tsuwano-list');
+  // 新店舗タブは該当ニュースがある時だけ表示
+  const shintenpoTab = document.getElementById('sub-tab-shintenpo');
+  if (shintenpoTab) shintenpoTab.hidden = shintenpo.length === 0;
 
-  allList.innerHTML = masudaList.innerHTML = hamadaList.innerHTML = tsuwanoList.innerHTML = '';
+  const allList       = document.getElementById('news-all-list');
+  const masudaList    = document.getElementById('news-masuda-list');
+  const hamadaList    = document.getElementById('news-hamada-list');
+  const tsuwanoList   = document.getElementById('news-tsuwano-list');
+  const shintenpoList = document.getElementById('news-shintenpo-list');
+
+  allList.innerHTML = masudaList.innerHTML = hamadaList.innerHTML = tsuwanoList.innerHTML = shintenpoList.innerHTML = '';
 
   if (recent.length > 0) {
     recent.forEach(ev => allList.appendChild(buildNewsCard(ev)));
@@ -365,6 +373,8 @@ function renderNews() {
   } else {
     tsuwanoList.innerHTML = '<p class="empty-msg">津和野町のニュースはありません。</p>';
   }
+
+  shintenpo.forEach(ev => shintenpoList.appendChild(buildNewsCard(ev)));
 }
 
 function buildNewsCard(ev) {
@@ -393,6 +403,12 @@ function buildNewsCard(ev) {
   // 出典・日付行
   const meta = document.createElement('div');
   meta.className = 'news-card-meta';
+  if (STORE_KEYWORDS.test(ev.title + (ev.comment || ''))) {
+    const tag = document.createElement('span');
+    tag.className = 'news-card-tag news-card-tag--store';
+    tag.textContent = '新店舗情報';
+    meta.appendChild(tag);
+  }
   if (ev.place) {
     const src = document.createElement('span');
     src.className = 'news-card-source';
@@ -519,6 +535,28 @@ async function openDetailModal(id) {
 
   const imgs = getImages(ev);
 
+  // 画像ギャラリー（タップで拡大）
+  if (imgs.length > 0) {
+    const gallery = document.createElement('div');
+    gallery.className = 'detail-gallery';
+    imgs.forEach((src, idx) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'detail-img-wrap';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `${ev.title} 画像${idx + 1}`;
+      img.loading = 'lazy';
+      wrap.appendChild(img);
+      const hint = document.createElement('span');
+      hint.className = 'detail-img-hint';
+      hint.textContent = 'タップして拡大';
+      wrap.appendChild(hint);
+      wrap.addEventListener('click', () => openLightbox(imgs, idx));
+      gallery.appendChild(wrap);
+    });
+    body.appendChild(gallery);
+  }
+
   // タイトル
   const titleEl = document.createElement('h2');
   titleEl.className = 'detail-title';
@@ -560,24 +598,6 @@ async function openDetailModal(id) {
     linkEl.rel = 'noopener noreferrer';
     linkEl.textContent = '詳しくはこちら →';
     body.appendChild(linkEl);
-  }
-
-  // 画像ギャラリー（テキストの後・タップで拡大）
-  if (imgs.length > 0) {
-    const gallery = document.createElement('div');
-    gallery.className = 'detail-gallery';
-    imgs.forEach((src, idx) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'detail-img-wrap';
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = `${ev.title} 画像${idx + 1}`;
-      img.loading = 'lazy';
-      wrap.appendChild(img);
-      wrap.addEventListener('click', () => openLightbox(imgs, idx));
-      gallery.appendChild(wrap);
-    });
-    body.appendChild(gallery);
   }
 
   // 管理ボタン（ログイン中のみ）
