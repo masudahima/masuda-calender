@@ -431,7 +431,7 @@ body.loading::before {
 .detail-img-wrap:focus-visible { outline: 3px solid var(--color-primary); }
 .detail-img-hint {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  top: 0; left: 0; right: 0;
   background: rgba(0,0,0,0.45);
   color: #fff;
   font-size: 11px;
