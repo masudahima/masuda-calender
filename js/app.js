@@ -120,10 +120,10 @@ function renderCalendar(year, month) {
   const firstDow = new Date(year, month, 1).getDay();
   const lastDay  = new Date(year, month + 1, 0).getDate();
 
-  // 月内イベントを日付でグループ化
+  // 月内イベント（ニュース除く）を日付でグループ化
   const byDate = {};
   for (const ev of allEvents) {
-    if (ev.date.startsWith(prefix)) {
+    if (!ev.is_news && ev.date.startsWith(prefix)) {
       (byDate[ev.date] = byDate[ev.date] || []).push(ev);
     }
   }
@@ -153,28 +153,21 @@ function renderCalendar(year, month) {
     cell.appendChild(num);
 
     if (evs.length > 0) {
-      const imgs = getImages(evs[0]);
-      if (imgs.length > 0) {
-        const thumb = document.createElement('img');
-        thumb.className = 'day-thumb';
-        thumb.src = imgs[0];
-        thumb.alt = '';
-        thumb.loading = 'lazy';
-        cell.appendChild(thumb);
-      } else {
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'day-dots';
+      const max = Math.min(evs.length, 3);
+      for (let i = 0; i < max; i++) {
         const dot = document.createElement('span');
         dot.className = 'day-dot';
-        cell.appendChild(dot);
+        dotsWrap.appendChild(dot);
       }
-      if (evs.length > 1) {
-        const more = document.createElement('span');
-        more.className = 'day-more';
-        more.textContent = `+${evs.length - 1}`;
-        cell.appendChild(more);
-      }
+      cell.appendChild(dotsWrap);
     }
 
-    cell.addEventListener('click', () => openDayModal(dateStr));
+    if (evs.length > 0) {
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', () => openDayModal(dateStr));
+    }
     grid.appendChild(cell);
   }
 }
@@ -223,6 +216,7 @@ function buildLatestCard(ev) {
   if (ev.area) {
     const area = document.createElement('span');
     area.className = 'latest-card-area';
+    area.dataset.area = ev.area;
     area.textContent = ev.area;
     body.appendChild(area);
   }
@@ -250,6 +244,7 @@ function buildLatestCard(ev) {
 // ===================================================================
 function renderEventList() {
   const container = document.getElementById('event-list');
+  if (!container) return;
   container.innerHTML = '';
 
   const today = todayStr();
@@ -370,23 +365,39 @@ function buildNewsCard(ev) {
   const card = document.createElement('div');
   card.className = 'news-card';
 
-  const imgs = getImages(ev);
-  if (imgs.length > 0) {
+  // サムネイル（image_url 優先、なければ images[0]）
+  const thumbUrl = ev.image_url || (ev.images && ev.images[0]);
+  if (thumbUrl) {
     const img = document.createElement('img');
     img.className = 'news-card-img';
-    img.src = imgs[0];
+    img.src = thumbUrl;
     img.alt = ev.title;
     img.loading = 'lazy';
     card.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'news-card-img-placeholder';
+    ph.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+    card.appendChild(ph);
   }
 
   const body = document.createElement('div');
   body.className = 'news-card-body';
 
-  const dateEl = document.createElement('div');
+  // 出典・日付行
+  const meta = document.createElement('div');
+  meta.className = 'news-card-meta';
+  if (ev.place) {
+    const src = document.createElement('span');
+    src.className = 'news-card-source';
+    src.textContent = ev.place;
+    meta.appendChild(src);
+  }
+  const dateEl = document.createElement('span');
   dateEl.className = 'news-card-date';
   dateEl.textContent = formatDateJa(ev.date);
-  body.appendChild(dateEl);
+  meta.appendChild(dateEl);
+  body.appendChild(meta);
 
   const titleEl = document.createElement('div');
   titleEl.className = 'news-card-title';
@@ -400,8 +411,23 @@ function buildNewsCard(ev) {
     body.appendChild(desc);
   }
 
+  if (ev.link) {
+    const linkEl = document.createElement('a');
+    linkEl.className = 'news-card-link';
+    linkEl.href = ev.link;
+    linkEl.target = '_blank';
+    linkEl.rel = 'noopener noreferrer';
+    linkEl.textContent = `詳しくはこちら${ev.place ? `（${ev.place}）` : ''} →`;
+    body.appendChild(linkEl);
+  }
+
   card.appendChild(body);
-  card.addEventListener('click', () => openDetailModal(ev.id));
+
+  card.addEventListener('click', e => {
+    if (e.target.tagName === 'A') return;
+    if (ev.link) window.open(ev.link, '_blank', 'noopener,noreferrer');
+    else openDetailModal(ev.id);
+  });
   return card;
 }
 
@@ -517,7 +543,7 @@ async function openDetailModal(id) {
 
   const rows = [
     ['日時', formatDateJa(ev.date)],
-    ev.place ? ['場所', ev.place] : null,
+    ev.place ? [ev.is_news ? '出典' : '場所', ev.place] : null,
     ev.area  ? ['エリア', ev.area] : null,
   ].filter(Boolean);
 
@@ -628,25 +654,104 @@ function showToast(msg, type = 'info') {
 }
 
 // ===================================================================
-//  タブ・サブタブ切り替え
+//  サブタブ切り替え（ニュース）
 // ===================================================================
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    const active = btn.dataset.tab === tabName;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-selected', String(active));
-  });
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.hidden = panel.id !== `tab-${tabName}`;
-  });
-}
-
 function switchSubTab(areaName) {
   document.querySelectorAll('.sub-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.area === areaName);
   });
   document.querySelectorAll('.sub-tab-panel').forEach(panel => {
     panel.hidden = panel.id !== `news-${areaName}-list`;
+  });
+}
+
+// ===================================================================
+//  アジェンダ（テキストカレンダー）
+// ===================================================================
+function openAgendaModal() {
+  renderAgenda();
+  document.getElementById('agenda-modal').hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeAgendaModal() {
+  document.getElementById('agenda-modal').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function renderAgenda() {
+  const container = document.getElementById('agenda-body');
+  container.innerHTML = '';
+
+  const today = todayStr();
+  const evs = allEvents.filter(ev => !ev.is_news && ev.date >= today);
+
+  if (evs.length === 0) {
+    container.innerHTML = '<p class="empty-msg">登録されているイベントはありません。</p>';
+    return;
+  }
+
+  const byDate = {};
+  evs.forEach(ev => {
+    (byDate[ev.date] = byDate[ev.date] || []).push(ev);
+  });
+
+  Object.entries(byDate).sort().forEach(([date, events]) => {
+    const d = new Date(date + 'T00:00:00');
+    const group = document.createElement('div');
+    group.className = 'agenda-group';
+
+    const header = document.createElement('div');
+    header.className = 'agenda-date-header';
+    header.innerHTML = `
+      <span class="agenda-date-label">${d.getFullYear()}年</span>
+      <span class="agenda-date-num">${d.getMonth() + 1}/${d.getDate()}</span>
+      <span class="agenda-date-dow">（${DAY_NAMES[d.getDay()]}）</span>
+    `;
+    group.appendChild(header);
+
+    events.forEach(ev => {
+      const row = document.createElement('div');
+      row.className = 'agenda-event-row';
+      row.setAttribute('role', 'button');
+      row.setAttribute('tabindex', '0');
+
+      const marker = document.createElement('div');
+      marker.className = 'agenda-event-marker';
+      row.appendChild(marker);
+
+      const info = document.createElement('div');
+      info.className = 'agenda-event-info';
+
+      const title = document.createElement('div');
+      title.className = 'agenda-event-title';
+      title.textContent = ev.title;
+      info.appendChild(title);
+
+      if (ev.place) {
+        const place = document.createElement('div');
+        place.className = 'agenda-event-place';
+        place.textContent = ev.place;
+        info.appendChild(place);
+      }
+
+      row.appendChild(info);
+
+      const arrow = document.createElement('span');
+      arrow.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>`;
+      arrow.style.color = 'var(--color-text-light)';
+      arrow.style.flexShrink = '0';
+      row.appendChild(arrow);
+
+      row.addEventListener('click', () => { closeAgendaModal(); openDetailModal(ev.id); });
+      row.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeAgendaModal(); openDetailModal(ev.id); }
+      });
+
+      group.appendChild(row);
+    });
+
+    container.appendChild(group);
   });
 }
 
@@ -679,25 +784,26 @@ function setupModalListeners() {
 
   drawer.querySelectorAll('.drawer-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (btn.dataset.action === 'tab') {
-        switchTab(btn.dataset.tab);
-      } else if (btn.dataset.action === 'news') {
-        switchTab('news');
-        switchSubTab(btn.dataset.area);
-      }
       closeDrawer();
+      if (btn.dataset.action === 'agenda') {
+        openAgendaModal();
+      } else if (btn.dataset.action === 'news-scroll') {
+        switchSubTab(btn.dataset.area);
+        setTimeout(() => {
+          document.getElementById('news-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
     });
-  });
-
-  // タブ切り替え
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
   // サブタブ切り替え
   document.querySelectorAll('.sub-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchSubTab(btn.dataset.area));
   });
+
+  // アジェンダモーダル
+  document.getElementById('agenda-modal-close').addEventListener('click', closeAgendaModal);
+  document.getElementById('agenda-modal-overlay').addEventListener('click', closeAgendaModal);
 
   // 日付モーダル
   document.getElementById('day-modal-close').addEventListener('click', closeDayModal);
@@ -727,6 +833,7 @@ function setupModalListeners() {
       document.getElementById('lightbox').hidden = true;
       return;
     }
+    if (!document.getElementById('agenda-modal').hidden) { closeAgendaModal(); return; }
     closeDetailModal();
     closeDayModal();
   });

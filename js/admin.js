@@ -69,27 +69,40 @@ function setupAuth() {
   document.getElementById('cancel-event').addEventListener('click', _closeEventModal);
   document.getElementById('event-form').addEventListener('submit', _saveEvent);
 
+  // ニュースチェック → 専用フィールドの表示切替
+  document.getElementById('ev-is-news').addEventListener('change', _toggleNewsFields);
+
+  // リンクURL入力 → ニュース時はOGP自動取得
+  let _ogpTimer;
+  document.getElementById('ev-link').addEventListener('input', () => {
+    clearTimeout(_ogpTimer);
+    _ogpTimer = setTimeout(() => {
+      if (document.getElementById('ev-is-news').checked) {
+        _fetchOGP(document.getElementById('ev-link').value.trim());
+      }
+    }, 800);
+  });
+
   // 画像追加ボタン
   document.getElementById('ev-images').addEventListener('change', _onImagesSelect);
 
   // 管理ツールバー（ログイン中のみ表示）
-  document.getElementById('import-btn').addEventListener('click', () => {
+  const importBtn = document.getElementById('import-btn');
+  const exportBtn = document.getElementById('export-btn');
+  if (importBtn) importBtn.addEventListener('click', () => {
     document.getElementById('import-modal').hidden = false;
   });
-  document.getElementById('export-btn').addEventListener('click', _exportJSON);
+  if (exportBtn) exportBtn.addEventListener('click', _exportJSON);
 
-  // インポートモーダル
-  document.getElementById('import-modal-close').addEventListener('click', () => {
-    document.getElementById('import-modal').hidden = true;
-  });
-  document.getElementById('import-modal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) e.currentTarget.hidden = true;
-  });
-  document.getElementById('import-cancel').addEventListener('click', () => {
-    document.getElementById('import-modal').hidden = true;
-  });
-  document.getElementById('import-preview-btn').addEventListener('click', _previewImport);
-  document.getElementById('import-execute-btn').addEventListener('click', _executeImport);
+  // インポートモーダル（存在する場合のみ）
+  const importModal = document.getElementById('import-modal');
+  if (importModal) {
+    document.getElementById('import-modal-close')?.addEventListener('click', () => { importModal.hidden = true; });
+    importModal.addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+    document.getElementById('import-cancel')?.addEventListener('click', () => { importModal.hidden = true; });
+    document.getElementById('import-preview-btn')?.addEventListener('click', _previewImport);
+    document.getElementById('import-execute-btn')?.addEventListener('click', _executeImport);
+  }
 
   // クリーンアップバナー
   document.getElementById('cleanup-export-btn').addEventListener('click', _exportJSON);
@@ -176,24 +189,48 @@ function openEventForm(ev = null, defaultDate = null) {
   const dateVal = ev?.date ?? defaultDate ?? '';
   document.getElementById('ev-date').value = dateVal;
 
+  const isNews = ev?.is_news || false;
+
   if (ev) {
     document.getElementById('ev-title').value    = ev.title   || '';
-    document.getElementById('ev-place').value    = ev.place   || '';
     document.getElementById('ev-comment').value  = ev.comment || '';
     document.getElementById('ev-link').value     = ev.link    || '';
     document.getElementById('ev-area').value     = ev.area    || '';
-    document.getElementById('ev-is-news').checked  = ev.is_news  || false;
-    document.getElementById('ev-posted').checked   = ev.posted   || false;
+    document.getElementById('ev-is-news').checked  = isNews;
+    document.getElementById('ev-posted').checked   = ev.posted || false;
 
-    // 既存画像を imageState に読み込む
-    const imgs = getImages(ev);
-    _imageState = imgs.map(url => ({ url, file: null }));
+    if (isNews) {
+      // ニュース: place → 出典媒体名、image_url → サムネイル
+      document.getElementById('ev-source').value    = ev.place     || '';
+      document.getElementById('ev-thumb-url').value = ev.image_url || '';
+      // サムネがなくてリンクがあれば自動取得
+      if (!ev.image_url && ev.link) {
+        setTimeout(() => _fetchOGP(ev.link), 300);
+      }
+    } else {
+      document.getElementById('ev-place').value = ev.place || '';
+      // 既存アップロード画像を imageState に読み込む
+      const imgs = ev.images && ev.images.length > 0 ? ev.images : [];
+      _imageState = imgs.map(url => ({ url, file: null }));
+    }
   }
 
+  _toggleNewsFields();
   _renderImagePreviews();
 
   document.getElementById('event-modal').hidden = false;
   document.body.classList.add('modal-open');
+}
+
+function _toggleNewsFields() {
+  const isNews = document.getElementById('ev-is-news').checked;
+  document.getElementById('news-fields').hidden        = !isNews;
+  document.getElementById('event-place-group').hidden  = isNews;
+  document.getElementById('image-upload-area').closest('.form-group').hidden = isNews;
+  if (!isNews) {
+    document.getElementById('ev-source').value    = '';
+    document.getElementById('ev-thumb-url').value = '';
+  }
 }
 
 function _closeEventModal() {
@@ -255,11 +292,12 @@ async function _saveEvent(e) {
   errEl.hidden    = true;
 
   try {
-    const title = document.getElementById('ev-title').value.trim();
-    const date  = document.getElementById('ev-date').value;
+    const title  = document.getElementById('ev-title').value.trim();
+    const date   = document.getElementById('ev-date').value;
+    const isNews = document.getElementById('ev-is-news').checked;
 
     if (!title || !date) throw new Error('タイトルと日付は必須です');
-    if (_imageState.length === 0) throw new Error('画像を1枚以上追加してください');
+    if (!isNews && _imageState.length === 0) throw new Error('画像を1枚以上追加してください');
 
     // 重複チェック（新規のみ）
     if (!_editingId) {
@@ -272,24 +310,32 @@ async function _saveEvent(e) {
       if (dup) throw new Error('同じ日付と同じタイトルのイベントがすでに登録されています');
     }
 
-    // 画像アップロード（file がある項目だけ）
-    const finalUrls = await Promise.all(
-      _imageState.map(async item => {
-        if (!item.file) return item.url; // 既存URL
-        return await _uploadImage(item.file);
-      })
-    );
+    let finalUrls = [];
+    if (!isNews) {
+      // 通常イベント: ファイルをアップロード
+      finalUrls = await Promise.all(
+        _imageState.map(async item => {
+          if (!item.file) return item.url;
+          return await _uploadImage(item.file);
+        })
+      );
+    }
 
     const payload = {
       title,
       date,
-      place:   document.getElementById('ev-place').value.trim()   || null,
-      comment: document.getElementById('ev-comment').value.trim() || null,
-      link:    document.getElementById('ev-link').value.trim()    || null,
-      area:    document.getElementById('ev-area').value            || null,
-      images:  finalUrls,
-      is_news: document.getElementById('ev-is-news').checked,
-      posted:  document.getElementById('ev-posted').checked,
+      place:     isNews
+        ? (document.getElementById('ev-source').value.trim()    || null)
+        : (document.getElementById('ev-place').value.trim()     || null),
+      image_url: isNews
+        ? (document.getElementById('ev-thumb-url').value.trim() || null)
+        : null,
+      comment:   document.getElementById('ev-comment').value.trim() || null,
+      link:      document.getElementById('ev-link').value.trim()    || null,
+      area:      document.getElementById('ev-area').value            || null,
+      images:    isNews ? [] : finalUrls,
+      is_news:   isNews,
+      posted:    document.getElementById('ev-posted').checked,
     };
 
     const { error } = _editingId
@@ -308,6 +354,44 @@ async function _saveEvent(e) {
   } finally {
     btn.disabled    = false;
     btn.textContent = '登録する';
+  }
+}
+
+// ===================================================================
+//  OGP自動取得
+// ===================================================================
+async function _fetchOGP(url) {
+  if (!url || !url.startsWith('http')) return;
+
+  const thumbInput   = document.getElementById('ev-thumb-url');
+  const titleInput   = document.getElementById('ev-title');
+  const commentInput = document.getElementById('ev-comment');
+
+  thumbInput.placeholder = '取得中…';
+
+  try {
+    const res  = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    const html = data.contents || '';
+
+    const getMeta = (prop) => {
+      const m = html.match(new RegExp(`<meta[^>]*property=["']${prop}["'][^>]*content=["']([^"']+)["']`, 'i'))
+             || html.match(new RegExp(`<meta[^>]*content=["']([^"']+)["'][^>]*property=["']${prop}["']`, 'i'));
+      return m ? m[1] : null;
+    };
+
+    const img   = getMeta('og:image');
+    const title = getMeta('og:title');
+    const desc  = getMeta('og:description');
+
+    if (img)   thumbInput.value = img;
+    if (title && !titleInput.value)   titleInput.value   = title;
+    if (desc  && !commentInput.value) commentInput.value = desc;
+
+  } catch (err) {
+    console.warn('OGP fetch error:', err);
+  } finally {
+    thumbInput.placeholder = '記事のOGP画像URL（https://...）';
   }
 }
 
