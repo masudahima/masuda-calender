@@ -329,8 +329,8 @@ function renderNews() {
     .filter(ev => ev.date >= cutoffStr)
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  const masuda   = recent.filter(ev => ev.area !== '津和野' && ev.area !== '浜田');
-  const hamada   = recent.filter(ev => ev.area === '浜田');
+  const masuda   = recent.filter(ev => ev.area !== '津和野' && ev.area !== '浜田市');
+  const hamada   = recent.filter(ev => ev.area === '浜田市');
   const tsuwano  = recent.filter(ev => ev.area === '津和野');
   const shintenpo = recent.filter(ev => STORE_KEYWORDS.test(ev.title + (ev.comment || '')));
 
