@@ -72,6 +72,17 @@ function setupAuth() {
   // ニュースチェック → 専用フィールドの表示切替
   document.getElementById('ev-is-news').addEventListener('change', _toggleNewsFields);
 
+  // リンクURL入力 → ニュース時はOGP自動取得
+  let _ogpTimer;
+  document.getElementById('ev-link').addEventListener('input', () => {
+    clearTimeout(_ogpTimer);
+    _ogpTimer = setTimeout(() => {
+      if (document.getElementById('ev-is-news').checked) {
+        _fetchOGP(document.getElementById('ev-link').value.trim());
+      }
+    }, 800);
+  });
+
   // 画像追加ボタン
   document.getElementById('ev-images').addEventListener('change', _onImagesSelect);
 
@@ -192,6 +203,10 @@ function openEventForm(ev = null, defaultDate = null) {
       // ニュース: place → 出典媒体名、image_url → サムネイル
       document.getElementById('ev-source').value    = ev.place     || '';
       document.getElementById('ev-thumb-url').value = ev.image_url || '';
+      // サムネがなくてリンクがあれば自動取得
+      if (!ev.image_url && ev.link) {
+        setTimeout(() => _fetchOGP(ev.link), 300);
+      }
     } else {
       document.getElementById('ev-place').value = ev.place || '';
       // 既存アップロード画像を imageState に読み込む
@@ -339,6 +354,44 @@ async function _saveEvent(e) {
   } finally {
     btn.disabled    = false;
     btn.textContent = '登録する';
+  }
+}
+
+// ===================================================================
+//  OGP自動取得
+// ===================================================================
+async function _fetchOGP(url) {
+  if (!url || !url.startsWith('http')) return;
+
+  const thumbInput   = document.getElementById('ev-thumb-url');
+  const titleInput   = document.getElementById('ev-title');
+  const commentInput = document.getElementById('ev-comment');
+
+  thumbInput.placeholder = '取得中…';
+
+  try {
+    const res  = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    const html = data.contents || '';
+
+    const getMeta = (prop) => {
+      const m = html.match(new RegExp(`<meta[^>]*property=["']${prop}["'][^>]*content=["']([^"']+)["']`, 'i'))
+             || html.match(new RegExp(`<meta[^>]*content=["']([^"']+)["'][^>]*property=["']${prop}["']`, 'i'));
+      return m ? m[1] : null;
+    };
+
+    const img   = getMeta('og:image');
+    const title = getMeta('og:title');
+    const desc  = getMeta('og:description');
+
+    if (img)   thumbInput.value = img;
+    if (title && !titleInput.value)   titleInput.value   = title;
+    if (desc  && !commentInput.value) commentInput.value = desc;
+
+  } catch (err) {
+    console.warn('OGP fetch error:', err);
+  } finally {
+    thumbInput.placeholder = '記事のOGP画像URL（https://...）';
   }
 }
 
