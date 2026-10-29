@@ -895,3 +895,40 @@ function setupModalListeners() {
 async function refreshAll() {
   await loadEvents();
 }
+
+// ===================================================================
+//  ボトムタブバー
+// ===================================================================
+(function () {
+  const tabs = document.querySelectorAll('.bottom-tab-item');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.dataset.target;
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // スクロール位置に応じてアクティブタブを切り替え
+  const sections = [
+    { id: 'section-calendar', tab: document.querySelector('[data-target="section-calendar"]') },
+    { id: 'section-events',   tab: document.querySelector('[data-target="section-events"]') },
+    { id: 'news-section',     tab: document.querySelector('[data-target="news-section"]') },
+  ];
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY + window.innerHeight / 3;
+    let current = sections[0];
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el && el.offsetTop <= scrollY) current = s;
+    });
+    tabs.forEach(t => t.classList.remove('active'));
+    if (current.tab) current.tab.classList.add('active');
+  }, { passive: true });
+})();
