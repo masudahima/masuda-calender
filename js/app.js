@@ -62,6 +62,7 @@ async function loadEvents() {
   renderLatest();
   renderEventList();
   renderNews();
+  renderOshirase();
 }
 
 // ===================================================================
@@ -270,6 +271,12 @@ function buildListItem(ev) {
   item.setAttribute('role', 'button');
   item.setAttribute('tabindex', '0');
 
+  const [, mm, dd] = ev.date.split('-');
+  const badge = document.createElement('div');
+  badge.className = 'list-date-badge';
+  badge.innerHTML = `<span class="list-date-month">${parseInt(mm)}月</span><span class="list-date-day">${parseInt(dd)}</span>`;
+  item.appendChild(badge);
+
   const imgs = getImages(ev);
   if (imgs.length > 0) {
     const img = document.createElement('img');
@@ -278,20 +285,10 @@ function buildListItem(ev) {
     img.alt = ev.title;
     img.loading = 'lazy';
     item.appendChild(img);
-  } else {
-    const ph = document.createElement('div');
-    ph.className = 'list-thumb-placeholder';
-    ph.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
-    item.appendChild(ph);
   }
 
   const info = document.createElement('div');
   info.className = 'list-info';
-
-  const dateEl = document.createElement('div');
-  dateEl.className = 'list-date';
-  dateEl.textContent = formatDateJa(ev.date);
-  info.appendChild(dateEl);
 
   const titleEl = document.createElement('div');
   titleEl.className = 'list-title';
@@ -324,8 +321,55 @@ function buildListItem(ev) {
 // ===================================================================
 const STORE_KEYWORDS = /オープン|新店舗|開店|グランドオープン|OPEN/i;
 
+// ===================================================================
+//  お知らせ
+// ===================================================================
+function renderOshirase() {
+  const section = document.getElementById('oshirase-section');
+  const list    = document.getElementById('oshirase-content');
+  if (!section || !list) return;
+
+  const items = allEvents
+    .filter(ev => ev.is_news && ev.title.startsWith('お知らせ：'))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  list.innerHTML = '';
+
+  if (items.length === 0) {
+    section.hidden = true;
+    return;
+  }
+
+  section.hidden = false;
+  items.forEach(ev => {
+    const li = document.createElement('li');
+    li.className = 'oshirase-item';
+
+    const [, m, d] = ev.date.split('-');
+    const dateEl = document.createElement('span');
+    dateEl.className = 'oshirase-date';
+    dateEl.textContent = `${parseInt(m)}月${parseInt(d)}日`;
+
+    const titleEl = document.createElement('p');
+    titleEl.className = 'oshirase-title';
+    titleEl.textContent = ev.title.replace(/^お知らせ[：:]/, '').trim();
+
+    li.appendChild(dateEl);
+    li.appendChild(titleEl);
+
+    if (ev.comment) {
+      const body = document.createElement('p');
+      body.className = 'oshirase-body';
+      body.textContent = ev.comment;
+      li.appendChild(body);
+    }
+
+    list.appendChild(li);
+  });
+}
+
 function renderNews() {
-  const newsEvs = allEvents.filter(ev => ev.is_news);
+  const newsEvs = allEvents.filter(ev => ev.is_news && !ev.title.startsWith('お知らせ：'));
 
   // 14日以内のニュースだけ表示
   const cutoff = new Date();
