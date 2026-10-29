@@ -227,6 +227,7 @@ body.loading::before {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
+.calendar-hint { font-size: 12px; color: var(--color-text-light); margin-bottom: 10px; text-align: center; }
 .calendar-wrapper { border: 1.5px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
 .calendar-weekdays {
   display: grid;

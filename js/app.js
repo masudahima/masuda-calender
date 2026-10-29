@@ -318,16 +318,22 @@ function buildListItem(ev) {
 // ===================================================================
 function renderNews() {
   const newsEvs = allEvents.filter(ev => ev.is_news);
-  const sorted  = [...newsEvs].sort((a, b) => b.date.localeCompare(a.date));
 
-  const masuda  = newsEvs.filter(ev => ev.area !== '津和野' && ev.area !== '浜田市');
-  const hamada  = newsEvs.filter(ev => ev.area === '浜田市');
-  const tsuwano = newsEvs.filter(ev => ev.area === '津和野');
-  const recent3 = sorted.slice(0, 3);
+  // 14日以内のニュースだけ表示
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
+  const cutoffStr = formatDate(cutoff);
+  const recent = [...newsEvs]
+    .filter(ev => ev.date >= cutoffStr)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const masuda  = recent.filter(ev => ev.area !== '津和野' && ev.area !== '浜田市');
+  const hamada  = recent.filter(ev => ev.area === '浜田市');
+  const tsuwano = recent.filter(ev => ev.area === '津和野');
 
   // サブタブ「すべて」の件数を更新
   const allBtn = document.querySelector('.sub-tab-btn[data-area="all"]');
-  if (allBtn) allBtn.innerHTML = `すべて<span class="sub-tab-note">（${recent3.length}件）</span>`;
+  if (allBtn) allBtn.innerHTML = `すべて<span class="sub-tab-note">（${recent.length}件）</span>`;
 
   const allList     = document.getElementById('news-all-list');
   const masudaList  = document.getElementById('news-masuda-list');
@@ -336,8 +342,8 @@ function renderNews() {
 
   allList.innerHTML = masudaList.innerHTML = hamadaList.innerHTML = tsuwanoList.innerHTML = '';
 
-  if (recent3.length > 0) {
-    recent3.forEach(ev => allList.appendChild(buildNewsCard(ev)));
+  if (recent.length > 0) {
+    recent.forEach(ev => allList.appendChild(buildNewsCard(ev)));
   } else {
     allList.innerHTML = '<p class="empty-msg">ニュースはありません。</p>';
   }
@@ -513,24 +519,6 @@ async function openDetailModal(id) {
 
   const imgs = getImages(ev);
 
-  // 画像ギャラリー
-  if (imgs.length > 0) {
-    const gallery = document.createElement('div');
-    gallery.className = 'detail-gallery';
-    imgs.forEach((src, idx) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'detail-img-wrap';
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = `${ev.title} 画像${idx + 1}`;
-      img.loading = 'lazy';
-      wrap.appendChild(img);
-      wrap.addEventListener('click', () => openLightbox(imgs, idx));
-      gallery.appendChild(wrap);
-    });
-    body.appendChild(gallery);
-  }
-
   // タイトル
   const titleEl = document.createElement('h2');
   titleEl.className = 'detail-title';
@@ -572,6 +560,24 @@ async function openDetailModal(id) {
     linkEl.rel = 'noopener noreferrer';
     linkEl.textContent = '詳しくはこちら →';
     body.appendChild(linkEl);
+  }
+
+  // 画像ギャラリー（テキストの後・タップで拡大）
+  if (imgs.length > 0) {
+    const gallery = document.createElement('div');
+    gallery.className = 'detail-gallery';
+    imgs.forEach((src, idx) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'detail-img-wrap';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `${ev.title} 画像${idx + 1}`;
+      img.loading = 'lazy';
+      wrap.appendChild(img);
+      wrap.addEventListener('click', () => openLightbox(imgs, idx));
+      gallery.appendChild(wrap);
+    });
+    body.appendChild(gallery);
   }
 
   // 管理ボタン（ログイン中のみ）
