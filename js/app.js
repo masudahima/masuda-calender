@@ -472,6 +472,23 @@ function openDayModal(dateStr) {
   // 「イベント登録」ボタンに日付を渡す
   document.getElementById('day-register-btn').dataset.date = dateStr;
 
+  // スクロールヒント
+  const hint = document.getElementById('day-scroll-hint');
+  const modalContent = document.querySelector('#day-modal .modal-content');
+  hint.hidden = true;
+  if (evs.length > 1) {
+    requestAnimationFrame(() => {
+      if (modalContent.scrollHeight > modalContent.clientHeight) {
+        hint.hidden = false;
+      }
+    });
+  }
+  modalContent.addEventListener('scroll', function onScroll() {
+    const nearBottom = modalContent.scrollTop + modalContent.clientHeight >= modalContent.scrollHeight - 40;
+    hint.hidden = nearBottom;
+    if (nearBottom) modalContent.removeEventListener('scroll', onScroll);
+  }, { passive: true });
+
   document.getElementById('day-modal').hidden = false;
   document.body.classList.add('modal-open');
 }

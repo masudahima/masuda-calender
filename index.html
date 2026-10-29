@@ -164,11 +164,15 @@
         </button>
       </div>
       <div class="modal-body">
-        <button id="day-register-btn" class="btn btn-primary btn-full">
+        <div id="day-modal-events" class="day-event-list"></div>
+        <button id="day-register-btn" class="btn btn-primary btn-full day-register-bottom">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           イベント登録
         </button>
-        <div id="day-modal-events" class="day-event-list"></div>
+      </div>
+      <div id="day-scroll-hint" class="day-scroll-hint" hidden>
+        <span class="day-scroll-hint-arrow">↓</span>
+        <span>スクロールして確認</span>
       </div>
     </div>
   </div>
@@ -350,8 +354,8 @@
   <div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
-  <script src="js/admin.js?v=14"></script>
+  <script src="js/config.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
+  <script src="js/admin.js?v=16"></script>
 </body>
 </html>

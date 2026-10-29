@@ -717,6 +717,29 @@ select   { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3
   flex-direction: column;
   gap: 14px;
 }
+.day-register-bottom { margin-top: 8px; }
+
+.day-scroll-hint {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 18px 0 14px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) 55%);
+  font-size: 12px;
+  color: var(--color-text-light);
+  pointer-events: none;
+}
+.day-scroll-hint-arrow {
+  font-size: 18px;
+  animation: bounce-down 1.2s ease-in-out infinite;
+}
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
 body.modal-open { overflow: hidden; }
 
 /* ===== Lightbox ===== */
