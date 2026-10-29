@@ -992,10 +992,10 @@ body.modal-open { overflow: hidden; }
   letter-spacing: 0.02em;
 }
 /* エリア別カラー */
-.latest-card-area[data-area="市街地"]  { color: #2d6a4f; background: #d8f3dc; }
-.latest-card-area[data-area="美都"]    { color: #0e7490; background: #cffafe; }
-.latest-card-area[data-area="匹見"]    { color: #92400e; background: #fef3c7; }
-.latest-card-area[data-area="浜田市"]  { color: #1d4ed8; background: #dbeafe; }
+.latest-card-area[data-area="市街地"]  { color: #475569; background: #f1f5f9; }
+.latest-card-area[data-area="美都"]    { color: #c2410c; background: #ffedd5; }
+.latest-card-area[data-area="匹見"]    { color: #166534; background: #dcfce7; }
+.latest-card-area[data-area="浜田市"]  { color: #0e7490; background: #cffafe; }
 .latest-card-area[data-area="津和野"]  { color: #6d28d9; background: #ede9fe; }
 .latest-card-area[data-area="その他"]  { color: #475569; background: #f1f5f9; }
 .latest-card-title {
