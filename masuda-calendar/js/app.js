@@ -153,25 +153,15 @@ function renderCalendar(year, month) {
     cell.appendChild(num);
 
     if (evs.length > 0) {
-      const imgs = getImages(evs[0]);
-      if (imgs.length > 0) {
-        const thumb = document.createElement('img');
-        thumb.className = 'day-thumb';
-        thumb.src = imgs[0];
-        thumb.alt = '';
-        thumb.loading = 'lazy';
-        cell.appendChild(thumb);
-      } else {
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'day-dots';
+      const max = Math.min(evs.length, 3);
+      for (let i = 0; i < max; i++) {
         const dot = document.createElement('span');
         dot.className = 'day-dot';
-        cell.appendChild(dot);
+        dotsWrap.appendChild(dot);
       }
-      if (evs.length > 1) {
-        const more = document.createElement('span');
-        more.className = 'day-more';
-        more.textContent = `+${evs.length - 1}`;
-        cell.appendChild(more);
-      }
+      cell.appendChild(dotsWrap);
     }
 
     cell.addEventListener('click', () => openDayModal(dateStr));
@@ -223,6 +213,7 @@ function buildLatestCard(ev) {
   if (ev.area) {
     const area = document.createElement('span');
     area.className = 'latest-card-area';
+    area.dataset.area = ev.area;
     area.textContent = ev.area;
     body.appendChild(area);
   }
@@ -371,23 +362,39 @@ function buildNewsCard(ev) {
   const card = document.createElement('div');
   card.className = 'news-card';
 
-  const imgs = getImages(ev);
-  if (imgs.length > 0) {
+  // サムネイル（image_url 優先、なければ images[0]）
+  const thumbUrl = ev.image_url || (ev.images && ev.images[0]);
+  if (thumbUrl) {
     const img = document.createElement('img');
     img.className = 'news-card-img';
-    img.src = imgs[0];
+    img.src = thumbUrl;
     img.alt = ev.title;
     img.loading = 'lazy';
     card.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'news-card-img-placeholder';
+    ph.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+    card.appendChild(ph);
   }
 
   const body = document.createElement('div');
   body.className = 'news-card-body';
 
-  const dateEl = document.createElement('div');
+  // 出典・日付行
+  const meta = document.createElement('div');
+  meta.className = 'news-card-meta';
+  if (ev.place) {
+    const src = document.createElement('span');
+    src.className = 'news-card-source';
+    src.textContent = ev.place;
+    meta.appendChild(src);
+  }
+  const dateEl = document.createElement('span');
   dateEl.className = 'news-card-date';
   dateEl.textContent = formatDateJa(ev.date);
-  body.appendChild(dateEl);
+  meta.appendChild(dateEl);
+  body.appendChild(meta);
 
   const titleEl = document.createElement('div');
   titleEl.className = 'news-card-title';
@@ -401,8 +408,23 @@ function buildNewsCard(ev) {
     body.appendChild(desc);
   }
 
+  if (ev.link) {
+    const linkEl = document.createElement('a');
+    linkEl.className = 'news-card-link';
+    linkEl.href = ev.link;
+    linkEl.target = '_blank';
+    linkEl.rel = 'noopener noreferrer';
+    linkEl.textContent = `詳しくはこちら${ev.place ? `（${ev.place}）` : ''} →`;
+    body.appendChild(linkEl);
+  }
+
   card.appendChild(body);
-  card.addEventListener('click', () => openDetailModal(ev.id));
+
+  card.addEventListener('click', e => {
+    if (e.target.tagName === 'A') return;
+    if (ev.link) window.open(ev.link, '_blank', 'noopener,noreferrer');
+    else openDetailModal(ev.id);
+  });
   return card;
 }
 
@@ -518,7 +540,7 @@ async function openDetailModal(id) {
 
   const rows = [
     ['日時', formatDateJa(ev.date)],
-    ev.place ? ['場所', ev.place] : null,
+    ev.place ? [ev.is_news ? '出典' : '場所', ev.place] : null,
     ev.area  ? ['エリア', ev.area] : null,
   ].filter(Boolean);
 
