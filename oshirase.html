@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お知らせ｜益田市イベントカレンダー</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=19">
+  <link rel="icon" href="img/icon.png" type="image/png">
+  <style>
+    .oshirase-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .oshirase-item {
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .oshirase-date {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+    .oshirase-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+    .oshirase-body {
+      font-size: 13px;
+      color: #4b5563;
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+    .oshirase-empty {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 14px;
+      padding: 60px 0;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #6b7280;
+      text-decoration: none;
+      margin-bottom: 8px;
+    }
+    .back-link:hover { color: #374151; }
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          カレンダーに戻る
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding-top: 28px; padding-bottom: 40px;">
+      <p class="page-title">お知らせ</p>
+      <p class="page-sub">益田市イベントカレンダーからのお知らせです</p>
+
+      <div class="oshirase-list" id="oshirase-list">
+        <!-- お知らせをここに追加してください -->
+        <!--
+        <div class="oshirase-item">
+          <p class="oshirase-date">2026年11月1日</p>
+          <p class="oshirase-title">タイトル</p>
+          <p class="oshirase-body">本文</p>
+        </div>
+        -->
+        <p class="oshirase-empty">現在お知らせはありません</p>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-tab-bar" aria-label="メインナビゲーション">
+    <a class="bottom-tab-item" href="index.html#section-calendar">カレンダー</a>
+    <a class="bottom-tab-item" href="index.html#section-events">イベント</a>
+    <a class="bottom-tab-item" href="index.html#news-section">ニュース</a>
+    <a class="bottom-tab-item active" href="oshirase.html">お知らせ</a>
+  </nav>
+</body>
+</html>
