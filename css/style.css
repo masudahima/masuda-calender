@@ -966,6 +966,7 @@ body.modal-open { overflow: hidden; }
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+  text-decoration: none;
   transition: background var(--ease), color var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
