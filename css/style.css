@@ -78,7 +78,7 @@ body.loading::before {
 .hidden   { display: none !important; }
 [hidden]  { display: none !important; }
 .sr-only  { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-.container { max-width: 820px; margin: 0 auto; padding: 0 16px; }
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 640px) { .container { padding: 0 24px; } }
 
 /* ===== Header ===== */
@@ -118,9 +118,8 @@ body.loading::before {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 200px;
-  object-fit: cover;
-  object-position: center;
+  max-width: 500px;
+  margin: 0 auto;
 }
 .title-br { display: block; }
 @media (min-width: 540px) { .title-br { display: none; } }
