@@ -78,7 +78,7 @@ body.loading::before {
 .hidden   { display: none !important; }
 [hidden]  { display: none !important; }
 .sr-only  { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 640px) { .container { padding: 0 24px; } }
 
 /* ===== Header ===== */
