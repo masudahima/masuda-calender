@@ -450,7 +450,7 @@ function renderCmp() {
   const sorted = [...getFiltered()].sort((a,b) => a.dist - b.dist);
   document.getElementById('count-badge').textContent = sorted.length + 'か所';
   document.getElementById('cmp-view').innerHTML = sorted.map(s => { const st = statusOf(s); return `
-    <div class="cmp-row" onclick="switchView('card')">
+    <div class="cmp-row" onclick="openCard(${s.id})">
       <div>
         <div class="cmp-name">${s.name}</div>
         <div class="cmp-area">${s.area}</div>
@@ -466,6 +466,12 @@ function renderCmp() {
 }
 
 function render() { renderCards(); renderCmp(); }
+
+function openCard(id) {
+  switchView('card');
+  const el = document.getElementById('card-' + id);
+  if (el) setTimeout(() => el.scrollIntoView({inline:'center', block:'nearest'}), 30);
+}
 
 function switchView(v) {
   currentView = v;
