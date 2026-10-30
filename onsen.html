@@ -92,7 +92,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .card{
   scroll-snap-align:start;
   flex-shrink:0;
-  width:100vw;
+  width:92vw;
   padding:0 var(--side);
   background:transparent;
   border:none;
@@ -163,6 +163,18 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .swipe-hint{font-size:16px;color:var(--fg-3);text-align:center;padding:0 0 12px;letter-spacing:0.03em}
 .card-view[hidden],.cmp-view[hidden]{display:none!important}
 .note{font-size:14px;color:var(--fg-3);text-align:center;padding:8px var(--side) 20px}
+
+/* === senior-friendly sizing (2026-10-30) === */
+body{font-size:17px}
+.header-title{font-size:25px}
+.header-sub{font-size:16px}
+.header-mascot{width:46px;height:46px}
+.back-btn{width:44px;height:44px}
+.swipe-hint{font-size:16px;font-weight:600;color:var(--fg-2);text-align:center;padding:10px 0 2px}
+.onsen-name{font-size:24px}
+.info-grid{font-size:17px}
+.note{font-size:15px}
+.cmp-name{font-size:21px}
 </style>
 
 <div class="header">
@@ -199,7 +211,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
   <!-- CARD SCROLL -->
   <div id="card-view">
-    <div class="swipe-hint padded">← 左右にスワイプして切り替え →</div>
+    <div class="swipe-hint padded">← 横にスワイプしてください →</div>
     <div class="card-scroll-wrap">
       <div class="card-scroll" id="card-scroll"></div>
     </div>
