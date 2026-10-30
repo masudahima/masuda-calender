@@ -187,15 +187,17 @@ function openEventForm(ev = null, defaultDate = null) {
 
   // 日付（タップした日を自動入力）
   const dateVal = ev?.date ?? defaultDate ?? '';
-  document.getElementById('ev-date').value = dateVal;
+  document.getElementById('ev-date').value     = dateVal;
+  document.getElementById('ev-end-date').value = '';
 
   const isNews = ev?.is_news || false;
 
   if (ev) {
-    document.getElementById('ev-title').value    = ev.title   || '';
-    document.getElementById('ev-comment').value  = ev.comment || '';
-    document.getElementById('ev-link').value     = ev.link    || '';
-    document.getElementById('ev-area').value     = ev.area    || '';
+    document.getElementById('ev-title').value    = ev.title    || '';
+    document.getElementById('ev-end-date').value = ev.end_date || '';
+    document.getElementById('ev-comment').value  = ev.comment  || '';
+    document.getElementById('ev-link').value     = ev.link     || '';
+    document.getElementById('ev-area').value     = ev.area     || '';
     document.getElementById('ev-is-news').checked  = isNews;
     document.getElementById('ev-posted').checked   = ev.posted || false;
 
@@ -321,9 +323,11 @@ async function _saveEvent(e) {
       );
     }
 
+    const endDateVal = document.getElementById('ev-end-date').value.trim();
     const payload = {
       title,
       date,
+      end_date:  endDateVal || null,
       place:     isNews
         ? (document.getElementById('ev-source').value.trim()    || null)
         : (document.getElementById('ev-place').value.trim()     || null),

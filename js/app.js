@@ -121,11 +121,19 @@ function renderCalendar(year, month) {
   const firstDow = new Date(year, month, 1).getDay();
   const lastDay  = new Date(year, month + 1, 0).getDate();
 
-  // 月内イベント（ニュース除く）を日付でグループ化
+  // 月内イベント（ニュース除く）を日付でグループ化（複数日対応）
+  const monthStart = `${year}-${pad2(month + 1)}-01`;
+  const monthEnd   = `${year}-${pad2(month + 1)}-${pad2(lastDay)}`;
   const byDate = {};
   for (const ev of allEvents) {
-    if (!ev.is_news && ev.date.startsWith(prefix)) {
-      (byDate[ev.date] = byDate[ev.date] || []).push(ev);
+    if (ev.is_news) continue;
+    const end = ev.end_date || ev.date;
+    if (ev.date > monthEnd || end < monthStart) continue;
+    for (let d = 1; d <= lastDay; d++) {
+      const ds = `${prefix}${pad2(d)}`;
+      if (ds >= ev.date && ds <= end) {
+        (byDate[ds] = byDate[ds] || []).push(ev);
+      }
     }
   }
 
@@ -188,7 +196,11 @@ function renderLatest() {
   container.innerHTML = '';
 
   const today = todayStr();
-  const evs = allEvents.filter(ev => !ev.is_news && ev.date >= today).slice(0, 10);
+  const evs = allEvents.filter(ev => {
+    if (ev.is_news) return false;
+    const end = ev.end_date || ev.date;
+    return end >= today;
+  });
 
   if (evs.length === 0) {
     container.innerHTML = '<p class="empty-msg">直近のイベントはありません。</p>';
@@ -235,7 +247,9 @@ function buildLatestCard(ev) {
 
   const date = document.createElement('div');
   date.className = 'latest-card-date';
-  date.textContent = formatDateJa(ev.date);
+  date.textContent = ev.end_date && ev.end_date !== ev.date
+    ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
+    : formatDateJa(ev.date);
   body.appendChild(date);
 
   card.appendChild(body);
@@ -255,7 +269,11 @@ function renderEventList() {
   container.innerHTML = '';
 
   const today = todayStr();
-  const evs = allEvents.filter(ev => !ev.is_news && ev.date >= today);
+  const evs = allEvents.filter(ev => {
+    if (ev.is_news) return false;
+    const end = ev.end_date || ev.date;
+    return end >= today;
+  });
 
   if (evs.length === 0) {
     container.innerHTML = '<p class="empty-msg">登録されているイベントはありません。</p>';
@@ -294,6 +312,13 @@ function buildListItem(ev) {
   titleEl.className = 'list-title';
   titleEl.textContent = ev.title;
   info.appendChild(titleEl);
+
+  if (ev.end_date && ev.end_date !== ev.date) {
+    const endEl = document.createElement('div');
+    endEl.className = 'list-end-date';
+    endEl.textContent = `〜${formatDateJa(ev.end_date)}`;
+    info.appendChild(endEl);
+  }
 
   if (ev.place) {
     const placeEl = document.createElement('div');
@@ -509,7 +534,11 @@ function buildNewsCard(ev) {
 function openDayModal(dateStr) {
   document.getElementById('day-modal-title').textContent = `${dateStr} のイベント`;
 
-  const evs   = allEvents.filter(ev => ev.date === dateStr && !ev.is_news);
+  const evs   = allEvents.filter(ev => {
+    if (ev.is_news) return false;
+    const end = ev.end_date || ev.date;
+    return ev.date <= dateStr && end >= dateStr;
+  });
   const listEl = document.getElementById('day-modal-events');
   listEl.innerHTML = '';
 
@@ -642,7 +671,9 @@ async function openDetailModal(id) {
   meta.className = 'detail-meta';
 
   const rows = [
-    ['日時', formatDateJa(ev.date)],
+    ['日時', ev.end_date && ev.end_date !== ev.date
+      ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
+      : formatDateJa(ev.date)],
     ev.place ? [ev.is_news ? '出典' : '場所', ev.place] : null,
     ev.area  ? ['エリア', ev.area] : null,
   ].filter(Boolean);

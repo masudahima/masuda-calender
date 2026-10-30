@@ -110,7 +110,7 @@
         <div class="sub-tab-bar">
           <button class="sub-tab-btn active" data-area="all">すべて<span class="sub-tab-note">（3件）</span></button>
           <button class="sub-tab-btn" data-area="masuda">益田市</button>
-          <button class="sub-tab-btn" data-area="hamada">浜田市</button>
+          <button class="sub-tab-btn" data-area="hamada">浜田</button>
           <button class="sub-tab-btn" data-area="tsuwano">津和野町</button>
           <button class="sub-tab-btn sub-tab-btn--store" data-area="shintenpo" id="sub-tab-shintenpo" hidden>新店舗情報</button>
         </div>
@@ -247,6 +247,11 @@
             <input type="date" id="ev-date" class="readonly-input" readonly tabindex="-1">
           </div>
 
+          <div class="form-group" id="end-date-group">
+            <label for="ev-end-date">終了日 <span class="label-note">（複数日の場合）</span></label>
+            <input type="date" id="ev-end-date" placeholder="">
+          </div>
+
           <div class="form-group">
             <label for="ev-title">タイトル <span class="required" aria-hidden="true">*</span></label>
             <input type="text" id="ev-title" required placeholder="イベント名">
@@ -288,7 +293,8 @@
               <option value="匹見">匹見（益田市）</option>
               <option value="浜田市">浜田市</option>
               <option value="津和野">津和野町</option>
-              <option value="その他">その他（萩市など）</option>
+              <option value="吉賀">吉賀町</option>
+              <option value="その他">その他</option>
             </select>
           </div>
 
