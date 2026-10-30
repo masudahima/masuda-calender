@@ -105,6 +105,18 @@ body.loading::before {
   letter-spacing: -0.01em;
   color: var(--color-text);
 }
+.logo-banner {
+  width: 100%;
+  background: #c4a8e8;
+}
+.logo-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: cover;
+  object-position: center;
+}
 .title-br { display: block; }
 @media (min-width: 540px) { .title-br { display: none; } }
 .site-sub {
