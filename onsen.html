@@ -192,7 +192,7 @@ body{font-size:17px}
   <div class="padded">
     <div class="view-toggle">
       <button class="vbtn active" id="btn-card" onclick="switchView('card')">詳細カード</button>
-      <button class="vbtn" id="btn-cmp" onclick="switchView('cmp')">今日の比較</button>
+      <button class="vbtn" id="btn-cmp" onclick="switchView('cmp')">近い順いちらん</button>
     </div>
   </div>
 
@@ -355,13 +355,45 @@ let currentView = "card";
 function getFiltered() {
   return spots.filter(s => {
     if (currentFilter === "all") return true;
-    if (currentFilter === "open") return s.open;
+    if (currentFilter === "open") return statusOf(s).open;
     if (currentFilter === "sauna") return s.sauna;
     return s.filter.includes(currentFilter);
   });
 }
 function getSorted(list) {
-  return [...list].sort((a,b) => (b.open - a.open) || (spots.indexOf(a) - spots.indexOf(b)));
+  return [...list].sort((a,b) => (statusOf(b).open - statusOf(a).open) || (spots.indexOf(a) - spots.indexOf(b)));
+}
+
+
+const DOW = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+function isClosedToday(s, now) {
+  const c = s.closed || '';
+  if (!c || c.includes('なし') || c.includes('不定休')) return false;
+  const wm = c.match(/([日月火水木金土])曜日/);
+  if (!wm) return false;
+  if (DOW[wm[1]] !== now.getDay()) return false;
+  if (c.includes('第')) {
+    const list = [...c.matchAll(/第([1-5])/g)].map(x => +x[1]);
+    const nth = Math.floor((now.getDate() - 1) / 7) + 1;
+    return list.includes(nth);
+  }
+  return true;
+}
+function todayHours(s, now) {
+  const m = s.hours.match(/(\d{1,2}):(\d{2})〜(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  let o = (+m[1]) * 60 + (+m[2]), c = (+m[3]) * 60 + (+m[4]);
+  if (s.id === 16) { const d = now.getDay(); if (d === 6) c = 22 * 60; if (d === 0) o = 9 * 60; }
+  return [o, c];
+}
+function statusOf(s) {
+  const now = new Date();
+  if (isClosedToday(s, now)) return {label:'定休日', cls:'closed', open:false};
+  const t = todayHours(s, now);
+  const mins = now.getHours() * 60 + now.getMinutes();
+  if (t && mins < t[0]) return {label:'営業時間前', cls:'closed', open:false};
+  if (t && mins >= t[1]) return {label:'営業時間外', cls:'closed', open:false};
+  return {label:'営業中', cls:'open', open:true};
 }
 
 const photoSvg = `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
@@ -380,7 +412,7 @@ function renderCards() {
       <div class="card-inner">
         <div class="card-photo" style="background:${s.color}">
           ${photoHtml(s)}
-          <div class="status-tag ${s.open?'open':'closed'}">${s.open?'営業中':'休業'}</div>
+          <div class="status-tag ${statusOf(s).cls}">${statusOf(s).label}</div>
           <div class="sbadge ${s.sauna?'yes':'no'}">${s.sauna?saunaSvg+' サウナあり':'サウナなし'}</div>
           <div class="dist-tag">車 ${s.dist}分</div>
         </div>
@@ -415,9 +447,9 @@ function renderCards() {
 }
 
 function renderCmp() {
-  const sorted = getSorted(getFiltered());
+  const sorted = [...getFiltered()].sort((a,b) => a.dist - b.dist);
   document.getElementById('count-badge').textContent = sorted.length + 'か所';
-  document.getElementById('cmp-view').innerHTML = sorted.map(s => `
+  document.getElementById('cmp-view').innerHTML = sorted.map(s => { const st = statusOf(s); return `
     <div class="cmp-row" onclick="switchView('card')">
       <div>
         <div class="cmp-name">${s.name}</div>
@@ -426,11 +458,11 @@ function renderCmp() {
       </div>
       <div class="cmp-dist">車 ${s.dist}分</div>
       <div class="status-big">
-        <div class="s-pill ${s.open?'open':'closed'}">${s.open?'営業中':'休業'}</div>
-        <div class="s-hours">${s.open?s.hours.split('（')[0]:s.closed}</div>
+        <div class="s-pill ${st.cls}">${st.label}</div>
+        <div class="s-hours">${st.label==='定休日' ? s.closed : s.hours.split('（')[0]}</div>
       </div>
     </div>
-  `).join('');
+  `; }).join('');
 }
 
 function render() { renderCards(); renderCmp(); }
