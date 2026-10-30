@@ -104,6 +104,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   overflow:hidden;
   display:flex;align-items:center;justify-content:center;
 }
+.card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .photo-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.6);font-size:13px}
 .photo-placeholder svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5}
 .sbadge{position:absolute;top:10px;right:10px;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px}
@@ -181,6 +182,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="chip" data-f="masuda">益田市</div>
       <div class="chip" data-f="tsuwano">津和野・吉賀</div>
       <div class="chip" data-f="hamada">浜田市</div>
+      <div class="chip" data-f="gotsu">江津市</div>
       <div class="chip" data-f="hagi">萩市</div>
       <div class="chip" data-f="yamaguchi">山口県</div>
     </div>
@@ -210,7 +212,7 @@ const spots = [
     hours:"10:00〜20:00（最終受付 19:30）", closed:"毎週月曜日",
     price:"大人 550円 / 子供 270円",
     tags:["露天風呂","渓谷ビュー"],
-    color:"#2d6e55", instagram:"", website:""
+    color:"#2d6e55", instagram:"", website:"https://yasuragi-onsen.jp/"
   },
   {
     id:2, name:"美都温泉 湯元館", area:"美都（益田市）", filter:["masuda"],
@@ -218,7 +220,7 @@ const spots = [
     hours:"10:00〜21:00（最終受付 20:30）", closed:"毎週火曜日",
     price:"大人 620円 / 子供 310円",
     tags:["露天風呂","サウナ","休憩室あり"],
-    color:"#6d4c8a", instagram:"", website:""
+    color:"#6d4c8a", img:"https://mito-onsen.com/dsadmin/files/libs/3284/202207051714133162.png?1657008853", instagram:"", website:"https://mito-onsen.com/"
   },
   {
     id:3, name:"柿木温泉", area:"吉賀町", filter:["tsuwano"],
@@ -226,7 +228,7 @@ const spots = [
     hours:"10:00〜21:00（最終受付 20:30）", closed:"第2・第4水曜日",
     price:"大人 500円 / 子供 250円",
     tags:["源泉かけ流し","内湯"],
-    color:"#5c4a8a", instagram:"", website:""
+    color:"#5c4a8a", img:"https://storage.e.jimdo.com/cdn-cgi/image/quality=85,fit=scale-down,format=auto,width=2560,height=1928/image/419215994/7d5db2c8-251e-4ec9-8fe6-a0eedef0ac2f.jpg", instagram:"", website:"https://hatonoyu.jimdosite.com/"
   },
   {
     id:4, name:"津和野温泉 なごみの里", area:"津和野町", filter:["tsuwano"],
@@ -234,7 +236,7 @@ const spots = [
     hours:"10:00〜20:00（最終受付 19:30）", closed:"第2・第4水曜日",
     price:"大人 500円 / 子供 250円",
     tags:["内湯のみ","道の駅隣接"],
-    color:"#2e5e7a", instagram:"", website:""
+    color:"#2e5e7a", img:"https://static.wixstatic.com/media/c11ccd_6888291f62be4faf8f5604bf8ef845d8~mv2.jpg/v1/fill/w_980,h_653,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c11ccd_6888291f62be4faf8f5604bf8ef845d8~mv2.jpg", instagram:"", website:"https://www.nagomi-nosato.com/"
   },
   {
     id:5, name:"サンレディー浜田", area:"浜田市", filter:["hamada"],
@@ -250,15 +252,15 @@ const spots = [
     hours:"10:00〜21:00（最終受付 20:30）", closed:"第1・第3火曜日",
     price:"大人 650円 / 子供 320円",
     tags:["露天風呂","サウナ","食事処"],
-    color:"#3d6648", instagram:"", website:""
+    color:"#3d6648", img:"https://image.jimcdn.com/app/cms/image/transf/dimension=225x10000:format=jpg/path/sa6f191f93d551b80/image/ide4ee15c21c787e8/version/1705557214/image.jpg", instagram:"", website:"https://hagiabugawaonsenpark.jimdofree.com/"
   },
   {
-    id:7, name:"願成就温泉", area:"萩市周辺", filter:["hagi","yamaguchi"],
+    id:7, name:"願成就温泉", area:"山口市阿東", filter:["hagi","yamaguchi"],
     dist:75, sauna:false, open:true,
     hours:"10:00〜20:00（最終受付 19:30）", closed:"不定休",
     price:"大人 500円 / 子供 250円",
     tags:["源泉かけ流し","内湯"],
-    color:"#5a4060", instagram:"", website:""
+    color:"#5a4060", img:"https://static.wixstatic.com/media/aa4ff6_c9f5adcfdbad4330b8b6b064c8e60678~mv2.jpg/v1/crop/x_0,y_100,w_1850,h_704/fill/w_1208,h_460,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Photo%20Resizer%202025_04_18_02_13_41_edited.jpg", instagram:"", website:"https://www.ganjojuonsen.com/"
   },
   {
     id:8, name:"俵山温泉 清流荘", area:"長門市", filter:["yamaguchi"],
@@ -266,7 +268,7 @@ const spots = [
     hours:"9:00〜21:00（最終受付 20:30）", closed:"第2・第4木曜日",
     price:"大人 580円 / 子供 280円",
     tags:["源泉かけ流し","歴史的温泉"],
-    color:"#2d5a5a", instagram:"", website:""
+    color:"#2d5a5a", instagram:"", website:"https://www.tawarayamaonsen.com/"
   },
   {
     id:9, name:"長門湯本温泉 恩湯", area:"長門市", filter:["yamaguchi"],
@@ -274,8 +276,41 @@ const spots = [
     hours:"6:00〜22:00（最終受付 21:30）", closed:"不定休",
     price:"大人 700円 / 子供 350円",
     tags:["源泉かけ流し","歴史的温泉地","早朝営業"],
-    color:"#3d6648", instagram:"", website:""
+    color:"#3d6648", img:"https://yumotoonsen.com/wp-content/uploads/2026/10/onto-bath-men-202507.jpg", instagram:"", website:"https://www.onto.jp/"
+  },
+  {
+    id:10, name:"むいかいち温泉 ゆ・ら・ら", area:"吉賀町", filter:["tsuwano"],
+    dist:60, sauna:true, open:true,
+    hours:"10:00〜21:00（最終受付 20:00）", closed:"不定休",
+    price:"大人 800円 / 小学生 400円",
+    tags:["源泉かけ流し","露天風呂","道の駅併設"],
+    color:"#7a5c2e", img:"https://yurara2000.com/cont/wp-content/themes/muikaichionsen_yurara_theme/img/spa/img01.jpg", instagram:"", website:"https://yurara2000.com/spa/"
+  },
+  {
+    id:11, name:"美又温泉会館", area:"金城町（浜田市）", filter:["hamada"],
+    dist:85, sauna:false, open:true,
+    hours:"8:00〜21:00（最終受付 20:30）", closed:"毎週月曜日（祝日の場合は翌日）",
+    price:"大人 500円 / 子供 250円",
+    tags:["美肌の湯","共同浴場"],
+    color:"#4a6e8a", img:"https://www.kankou-shimane.com/jp/wp-content/uploads/2020/03/7071-mimataonsenkaikan-001-e1584856962375.jpg", instagram:"", website:"http://www.mimataonsen.com/facility_cat/facility_day/"
+  },
+  {
+    id:12, name:"旭温泉 あさひ荘", area:"旭町（浜田市）", filter:["hamada"],
+    dist:80, sauna:false, open:true,
+    hours:"9:00〜20:00（最終受付 19:30）", closed:"毎週火曜日",
+    price:"大人 500円 / 小学生 200円",
+    tags:["美人湯","日帰り専門"],
+    color:"#8a5a44", img:"https://static.wixstatic.com/media/11062b_f05cb708beeb44f19fc6ba49104f3bd2~mv2.jpg/v1/fill/w_980,h_651,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_f05cb708beeb44f19fc6ba49104f3bd2~mv2.jpg", instagram:"", website:"https://www.asahionsen.net/"
+  },
+  {
+    id:13, name:"有福温泉 御前湯", area:"江津市", filter:["gotsu"],
+    dist:90, sauna:false, open:true,
+    hours:"7:00〜22:00（最終受付 21:30）", closed:"毎週火曜日",
+    price:"中学生以上 400円 / 小学生 200円",
+    tags:["源泉かけ流し","美肌の湯","外湯めぐり"],
+    color:"#5e7a3d", img:"https://www.kankou-shimane.com/jp/wp-content/uploads/2020/03/4335-arihukuonsen-001-e1585009079102.jpg", instagram:"", website:"https://www.arifuku-onsen.com/"
   }
+
 ];
 // =====================================
 
@@ -300,6 +335,7 @@ const saunaSvg = `<svg viewBox="0 0 24 24"><path d="M12 2c-1 3-3 5-3 8a3 3 0 0 0
 const igSvg = `<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`;
 const webSvg = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>`;
 
+function photoHtml(s){ return s.img ? `<img class="card-img" src="${s.img}" alt="${s.name}" loading="lazy">` : `<div class="photo-placeholder">${photoSvg}<span>写真</span></div>`; }
 function renderCards() {
   const sorted = getSorted(getFiltered());
   document.getElementById('count-badge').textContent = sorted.length + 'か所';
@@ -307,7 +343,7 @@ function renderCards() {
   scroll.innerHTML = sorted.map(s => `
     <div class="card" id="card-${s.id}">
       <div class="card-photo" style="background:${s.color}">
-        <div class="photo-placeholder">${photoSvg}<span>写真</span></div>
+        ${photoHtml(s)}
         <div class="status-tag ${s.open?'open':'closed'}">${s.open?'営業中':'休業'}</div>
         <div class="sbadge ${s.sauna?'yes':'no'}">${s.sauna?saunaSvg+' サウナあり':'サウナなし'}</div>
         <div class="dist-tag">車 ${s.dist}分</div>
