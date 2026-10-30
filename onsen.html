@@ -1,4 +1,5 @@
 <title>温泉まとめ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@600;800&display=swap">
 <style>
@@ -52,6 +53,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
 .back-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .header-text{flex:1}
+.header-mascot{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff}
 .header-title{font-size:22px;font-weight:700;color:#fff}
 .header-sub{font-size:15px;color:rgba(255,255,255,.7);margin-top:2px}
 .header-count{background:rgba(255,255,255,.18);color:#fff;font-size:15px;padding:6px 14px;border-radius:20px;white-space:nowrap}
@@ -165,6 +167,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <div class="header">
   <button class="back-btn" aria-label="戻る"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <img class="header-mascot" src="img/icon.png" alt="">
   <div class="header-text">
     <div class="header-title">♨ 温泉まとめ</div>
     <div class="header-sub">益田駅から車で約1時間半以内</div>
