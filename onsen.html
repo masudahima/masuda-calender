@@ -179,8 +179,8 @@ body{font-size:17px}
 </style>
 
 <div class="header">
-  <button class="back-btn" aria-label="戻る" onclick="if(history.length>1){history.back()}else{location.href='index.html'}"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-  <img class="header-mascot" src="img/icon.png" alt="">
+  <a class="back-btn" href="index.html" aria-label="戻る"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <img class="header-mascot" src="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png" alt="">
   <div class="header-text">
     <div class="header-title">♨ 温泉まとめ</div>
     <div class="header-sub">益田駅から車で約1時間半以内</div>
@@ -242,7 +242,7 @@ const spots = [
     hours:"10:00〜21:00（最終受付 20:30）", closed:"毎週火曜日",
     price:"大人 620円 / 子供 310円",
     tags:["露天風呂","サウナ","休憩室あり"],
-    color:"#6d4c8a", img:"img/onsen-mito.jpg", instagram:"", website:"https://mito-onsen.com/"
+    color:"#6d4c8a", img:"https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/onsen-mito.jpg", instagram:"", website:"https://mito-onsen.com/"
   },
   {
     id:3, name:"柿木温泉", area:"吉賀町", filter:["tsuwano"],
@@ -325,7 +325,7 @@ const spots = [
     hours:"10:00〜22:00（最終受付 21:00）", closed:"なし",
     price:"大人 600円 / 小学生 250円",
     tags:["美肌の湯","露天風呂","老舗"],
-    color:"#6e3d54", img:"img/onsen-tada.jpg", instagram:"", website:"https://tadaonsen.com/index.html"
+    color:"#6e3d54", img:"https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/onsen-tada.jpg", instagram:"", website:"https://tadaonsen.com/index.html"
   }
 ,
   {
@@ -370,7 +370,7 @@ const saunaSvg = `<svg viewBox="0 0 24 24"><path d="M12 2c-1 3-3 5-3 8a3 3 0 0 0
 const igSvg = `<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`;
 const webSvg = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>`;
 
-function photoHtml(s){ return s.img ? `<img class="card-img" src="${s.img}" alt="${s.name}" loading="lazy">` : `<img class="card-mascot" src="img/icon.png" alt="">`; }
+function photoHtml(s){ return s.img ? `<img class="card-img" src="${s.img}" alt="${s.name}" loading="lazy">` : `<img class="card-mascot" src="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png" alt="">`; }
 function renderCards() {
   const sorted = getSorted(getFiltered());
   document.getElementById('count-badge').textContent = sorted.length + 'か所';
