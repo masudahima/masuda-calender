@@ -369,7 +369,7 @@ function getFiltered() {
   });
 }
 function getSorted(list) {
-  return [...list].sort((a,b) => spots.indexOf(a) - spots.indexOf(b));
+  return [...list].sort((a,b) => (statusOf(b).open - statusOf(a).open) || (spots.indexOf(a) - spots.indexOf(b)));
 }
 
 
