@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=29">
+  <link rel="stylesheet" href="css/style.css?v=30">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="icon" href="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png" type="image/png">
   <link rel="apple-touch-icon" href="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png">
@@ -109,7 +109,10 @@
       <section id="section-events" class="latest-section" aria-label="イベント一覧">
         <div class="latest-heading">
           <span class="latest-en">EVENTS</span>
-          <span class="latest-ja">イベント一覧</span>
+          <div class="latest-heading-row">
+            <span class="latest-ja">イベント一覧</span>
+            <button id="today-filter-btn" class="today-filter-btn" type="button" aria-pressed="false">今日のイベントにしぼる</button>
+          </div>
         </div>
         <div id="latest-scroll" class="latest-scroll"></div>
       </section>
@@ -417,7 +420,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js?v=24"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="js/app.js?v=29"></script>
+  <script src="js/app.js?v=30"></script>
   <script src="js/admin.js?v=24"></script>
 </body>
 </html>
