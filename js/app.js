@@ -614,8 +614,7 @@ function buildNewsCard(ev) {
 
   card.addEventListener('click', e => {
     if (e.target.tagName === 'A') return;
-    if (ev.link) window.open(ev.link, '_blank', 'noopener,noreferrer');
-    else openDetailModal(ev.id);
+    openDetailModal(ev.id);
   });
   return card;
 }
