@@ -36,12 +36,36 @@ async function init() {
   calendarYear  = now.getFullYear();
   calendarMonth = now.getMonth();
 
+  setupReloadButton();
   setupCalendarNav();
   setupModalListeners();
   setupLatestCardFocus();
   setupTodayFilter();
   setupAuth();      // admin.js で定義
   await loadEvents();
+}
+
+// ===================================================================
+//  更新ボタン（ホーム画面に追加した場合はURLバー／再読み込みボタンが
+//  出ないため、ページ内から再読み込みできるようにする）
+//  あわせて、アプリに戻ってきたときにデータを取り直す。
+// ===================================================================
+let _lastLoadAt = 0;
+function setupReloadButton() {
+  const btn = document.getElementById('reload-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      // キャッシュを避けて開き直す
+      const url = new URL(window.location.href);
+      url.searchParams.set('_r', Date.now());
+      window.location.replace(url.toString());
+    });
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - _lastLoadAt > 60 * 1000) {
+      loadEvents();
+    }
+  });
 }
 
 // ===================================================================
@@ -60,6 +84,7 @@ async function loadEvents() {
     return;
   }
 
+  _lastLoadAt = Date.now();
   allEvents = data || [];
   renderCalendar(calendarYear, calendarMonth);
   renderLatest();
