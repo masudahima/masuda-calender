@@ -6,6 +6,7 @@
 // --- 共有状態（admin.js と共有）---
 let supabaseClient;
 let allEvents   = [];
+let latestTodayOnly = false;
 let calendarYear, calendarMonth;
 
 // --- 定数 ---
@@ -38,6 +39,7 @@ async function init() {
   setupCalendarNav();
   setupModalListeners();
   setupLatestCardFocus();
+  setupTodayFilter();
   setupAuth();      // admin.js で定義
   await loadEvents();
 }
@@ -300,6 +302,21 @@ function scheduleLatestCardFocus() {
   });
 }
 
+function setupTodayFilter() {
+  const btn = document.getElementById('today-filter-btn');
+  if (!btn || btn.dataset.ready) return;
+  btn.dataset.ready = '1';
+  btn.addEventListener('click', () => {
+    latestTodayOnly = !latestTodayOnly;
+    btn.classList.toggle('active', latestTodayOnly);
+    btn.setAttribute('aria-pressed', String(latestTodayOnly));
+    btn.textContent = latestTodayOnly ? 'すべて表示' : '今日のイベントにしぼる';
+    renderLatest();
+    const scroller = document.getElementById('latest-scroll');
+    if (scroller) scroller.scrollTo({ left: 0, behavior: 'smooth' });
+  });
+}
+
 function setupLatestCardFocus() {
   const container = document.getElementById('latest-scroll');
   if (!container || container.dataset.focusReady) return;
@@ -320,11 +337,13 @@ function renderEventList() {
   const evs = allEvents.filter(ev => {
     if (ev.is_news) return false;
     const end = ev.end_date || ev.date;
-    return end >= today;
+    return end >= today && (!latestTodayOnly || ev.date <= today);
   });
 
   if (evs.length === 0) {
-    container.innerHTML = '<p class="empty-msg">登録されているイベントはありません。</p>';
+    container.innerHTML = latestTodayOnly
+      ? '<p class="empty-msg">今日のイベントはありません。</p>'
+      : '<p class="empty-msg">登録されているイベントはありません。</p>';
     return;
   }
 
