@@ -1478,3 +1478,42 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   .calendar-cell, .latest-card, .news-card, .agenda-event-row, .day-event-row,
   .map-pin { transition: none !important; }
 }
+
+
+/* ===== Latest carousel focus ===== */
+.latest-scroll {
+  padding-top: 8px;
+  padding-bottom: 14px;
+}
+.latest-scroll .latest-card {
+  transform: scale(var(--latest-scale, 0.96));
+  opacity: var(--latest-opacity, 0.8);
+  transform-origin: center center;
+  transition: transform 180ms ease-out, opacity 180ms ease-out,
+    box-shadow 180ms ease-out, border-color 180ms ease-out;
+}
+.latest-scroll .latest-card.is-front {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+  z-index: 1;
+}
+.latest-scroll .latest-card:active {
+  transform: scale(calc(var(--latest-scale, 1) * 0.97));
+}
+@media (max-width: 639px) {
+  .latest-scroll {
+    padding-left: max(16px, calc((100vw - 180px) / 2));
+    padding-right: max(16px, calc((100vw - 180px) / 2));
+  }
+  .latest-scroll .latest-card { scroll-snap-align: center; }
+}
+@media (min-width: 640px) {
+  .latest-scroll .latest-card { scroll-snap-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .latest-scroll .latest-card {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}
