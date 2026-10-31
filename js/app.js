@@ -488,9 +488,9 @@ function renderOshirase() {
 function renderNews() {
   const newsEvs = allEvents.filter(ev => ev.is_news && !ev.title.startsWith('お知らせ：'));
 
-  // 14日以内のニュースだけ表示
+  // 3週間（21日）以内のニュースだけ表示
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 14);
+  cutoff.setDate(cutoff.getDate() - 21);
   const cutoffStr = formatDate(cutoff);
   const recent = [...newsEvs]
     .filter(ev => ev.date >= cutoffStr)
