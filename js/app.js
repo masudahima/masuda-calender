@@ -981,18 +981,29 @@ function setupModalListeners() {
   drawerOverlay.addEventListener('click', closeDrawer);
 
   drawer.querySelectorAll('.drawer-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      closeDrawer();
-      if (btn.dataset.action === 'agenda') {
-        openAgendaModal();
-      } else if (btn.dataset.action === 'map') {
-        openMapModal();
-      } else if (btn.dataset.action === 'news-scroll') {
-        switchSubTab(btn.dataset.area);
-        setTimeout(() => {
-          document.getElementById('news-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+    btn.addEventListener('click', e => {
+      // 押した感触（ポチッ）を一瞬見せてから動作する
+      btn.classList.add('is-pressed');
+      if (!btn.dataset.action && btn.tagName === 'A') {
+        // 温泉まとめ（リンク）は、押し感を見せてから遷移する
+        e.preventDefault();
+        setTimeout(() => { window.location.href = btn.href; }, 140);
+        return;
       }
+      setTimeout(() => {
+        btn.classList.remove('is-pressed');
+        closeDrawer();
+        if (btn.dataset.action === 'agenda') {
+          openAgendaModal();
+        } else if (btn.dataset.action === 'map') {
+          openMapModal();
+        } else if (btn.dataset.action === 'news-scroll') {
+          switchSubTab(btn.dataset.area);
+          setTimeout(() => {
+            document.getElementById('news-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      }, 140);
     });
   });
 
