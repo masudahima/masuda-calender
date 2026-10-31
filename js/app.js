@@ -1145,7 +1145,8 @@ function renderMapDay() {
       marker.bindPopup(
         '<strong>' + esc(ev.title) + '</strong><br>' + period +
         (ev.place ? '<br>' + esc(ev.place) : '') +
-        '<br><a href="#" class="map-popup-link" data-id="' + ev.id + '">詳細を見る</a>'
+        '<br><a href="#" class="map-popup-link" data-id="' + ev.id + '">詳細を見る</a>' +
+        '<br><a href="https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng + '" target="_blank" rel="noopener">Googleマップで開く</a>'
       );
     });
   });
