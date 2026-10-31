@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=24">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="icon" href="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png" type="image/png">
   <link rel="apple-touch-icon" href="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-full.png">
 </head>
@@ -37,6 +38,10 @@
       <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="tsuwano">津和野町のニュース</button></li>
       <li><button class="drawer-item drawer-item--sub drawer-item--store" data-action="news-scroll" data-area="shintenpo">新店舗情報</button></li>
       <li class="drawer-section-label">おでかけ情報</li>
+      <li><button class="drawer-item" data-action="map">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        地図から見つける
+      </button></li>
       <li><a class="drawer-item" href="onsen.html">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6.5 11c0 3 1.5 5 5.5 5s5.5-2 5.5-5"/><path d="M5 6c0-1 .7-2 2-2 .5-1.5 2-2.5 3-2 .5-1 1.5-1.5 2.5-1 .8.4 1.5 1.2 1.5 2 1.2.1 2 1.1 2 2"/><path d="M5 6h14v5H5z"/></svg>
         ♨ 温泉まとめ
@@ -173,6 +178,33 @@
         </button>
       </div>
       <div id="agenda-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 地図モーダル -->
+  <div id="map-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="map-modal-title">
+    <div class="modal-overlay" id="map-modal-overlay"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="map-modal-title" class="modal-title">地図から見つける</h2>
+        <button class="modal-close" id="map-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body map-body">
+        <div class="map-datebar">
+          <button id="map-prev-day" class="map-nav-btn" aria-label="前の日">&#8249;</button>
+          <div class="map-date-wrap">
+            <span id="map-date-label"></span>
+            <input type="date" id="map-date-input" aria-label="日付を選ぶ">
+          </div>
+          <button id="map-next-day" class="map-nav-btn" aria-label="次の日">&#8250;</button>
+          <button id="map-today-btn" class="map-today-btn">今日</button>
+        </div>
+        <div id="event-map"></div>
+        <p class="map-note">ピンは開催場所の目安です（地区の中心あたり）。ピンをタップするとイベント名が出ます。</p>
+        <div id="map-day-list"></div>
+      </div>
     </div>
   </div>
 
@@ -384,6 +416,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js?v=24"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/app.js?v=24"></script>
   <script src="js/admin.js?v=24"></script>
 </body>
