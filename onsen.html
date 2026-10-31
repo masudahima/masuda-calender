@@ -84,16 +84,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   overflow-x:auto;
   scroll-snap-type:x mandatory;
   gap:0;
-  padding:4px 0 16px;
+  padding:14px 7vw 20px;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
 }
 .card-scroll::-webkit-scrollbar{display:none}
 .card{
-  scroll-snap-align:start;
+  scroll-snap-align:center;
   flex-shrink:0;
-  width:92vw;
-  padding:0 var(--side);
+  width:86vw;
+  padding:0 6px;
   background:transparent;
   border:none;
   border-radius:0;
@@ -104,6 +104,19 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   border:1px solid var(--border);
   border-radius:18px;
   overflow:hidden;
+}
+.card-inner{
+  transition:transform .18s ease-out,opacity .18s ease-out,box-shadow .18s ease-out,border-color .18s ease-out;
+  transform-origin:center center;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  will-change:transform,opacity;
+}
+.card.is-front .card-inner{
+  box-shadow:0 14px 30px rgba(0,0,0,.16);
+  border-color:var(--primary);
+}
+@media (prefers-reduced-motion: reduce){
+  .card-inner{transition:none}
 }
 .card-photo{
   width:100%;
@@ -446,12 +459,45 @@ function renderCards() {
   const dots = document.getElementById('dots');
   dots.innerHTML = sorted.map((_,i) => `<div class="dot${i===0?' active':''}" data-i="${i}"></div>`).join('');
 
-  // scroll → update dots (each card = 100vw)
-  scroll.addEventListener('scroll', () => {
-    const w = window.innerWidth;
-    const i = Math.round(scroll.scrollLeft / w);
-    dots.querySelectorAll('.dot').forEach((d,j) => d.classList.toggle('active', i===j));
-  }, {passive:true});
+  scheduleOnsenFocus();
+}
+
+// ===== 横スワイプ：真ん中のカードを大きく見せる =====
+const cardScrollEl = document.getElementById('card-scroll');
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let onsenFocusRaf = null;
+function updateOnsenFocus() {
+  if (!cardScrollEl) return;
+  const cards = cardScrollEl.querySelectorAll('.card');
+  if (cards.length === 0) return;
+  const cr = cardScrollEl.getBoundingClientRect();
+  const center = cr.left + cr.width / 2;
+  let best = null, bestD = Infinity;
+  cards.forEach(card => {
+    const r = card.getBoundingClientRect();
+    const d = Math.abs((r.left + r.width / 2) - center);
+    const t = Math.max(0, 1 - d / Math.max(r.width * 0.9, 1));
+    const inner = card.querySelector('.card-inner');
+    if (inner) {
+      if (REDUCED_MOTION) { inner.style.transform = 'none'; inner.style.opacity = '1'; }
+      else {
+        inner.style.transform = 'scale(' + (0.93 + t * 0.08).toFixed(3) + ')';
+        inner.style.opacity = (0.7 + t * 0.3).toFixed(3);
+      }
+    }
+    if (d < bestD) { bestD = d; best = card; }
+  });
+  cards.forEach(c => c.classList.toggle('is-front', c === best));
+  const idx = [...cards].indexOf(best);
+  document.querySelectorAll('#dots .dot').forEach((dt, j) => dt.classList.toggle('active', j === idx));
+}
+function scheduleOnsenFocus() {
+  if (onsenFocusRaf !== null) return;
+  onsenFocusRaf = requestAnimationFrame(() => { onsenFocusRaf = null; updateOnsenFocus(); });
+}
+if (cardScrollEl) {
+  cardScrollEl.addEventListener('scroll', scheduleOnsenFocus, {passive:true});
+  window.addEventListener('resize', scheduleOnsenFocus);
 }
 
 function renderCmp() {
