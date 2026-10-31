@@ -918,6 +918,8 @@ function setupModalListeners() {
       closeDrawer();
       if (btn.dataset.action === 'agenda') {
         openAgendaModal();
+      } else if (btn.dataset.action === 'map') {
+        openMapModal();
       } else if (btn.dataset.action === 'news-scroll') {
         switchSubTab(btn.dataset.area);
         setTimeout(() => {
@@ -1013,3 +1015,165 @@ async function refreshAll() {
     if (current.tab) current.tab.classList.add('active');
   }, { passive: true });
 })();
+
+
+// ===================================================================
+//  地図から見つける（ハンバーガーメニュー／日付ごとに切替）
+// ===================================================================
+const MAP_PIN_SPOTS = [
+  ['三隅', 34.790, 131.888],
+  ['石正美術館', 34.790, 131.888],
+  ['柿木', 34.400, 132.035],
+  ['青原', 34.435, 131.715],
+  ['匹見', 34.585, 132.030],
+  ['美都', 34.660, 131.985],
+  ['津和野', 34.460, 131.770],
+  ['六日市', 34.353, 131.938],
+  ['吉賀', 34.353, 131.938],
+  ['浜田', 34.899, 132.079],
+  ['江津', 35.011, 132.218],
+  ['萩', 34.408, 131.399]
+];
+const MAP_AREA_CENTER = {
+  '市街地': [34.674, 131.864],
+  '匹見': [34.585, 132.030],
+  '美都': [34.660, 131.985],
+  '津和野': [34.460, 131.770],
+  '吉賀': [34.353, 131.938],
+  '浜田市': [34.899, 132.079],
+  '浜田': [34.899, 132.079],
+  '江津市': [35.011, 132.218],
+  '萩市': [34.408, 131.399]
+};
+function coordForEvent(ev) {
+  const text = (ev.place || '') + ' ' + (ev.title || '');
+  for (const [kw, la, ln] of MAP_PIN_SPOTS) {
+    if (text.includes(kw)) return [la, ln];
+  }
+  return MAP_AREA_CENTER[ev.area] || null;
+}
+
+let evMap = null;
+let evMapLayer = null;
+let mapDateStr = null;
+let mapListenersBound = false;
+
+function mapFmtDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function mapParseDate(str) {
+  const p = str.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+
+function openMapModal() {
+  const modal = document.getElementById('map-modal');
+  modal.hidden = false;
+  document.body.classList.add('modal-open');
+  if (!mapDateStr) mapDateStr = mapFmtDate(new Date());
+  if (!mapListenersBound) { bindMapListeners(); mapListenersBound = true; }
+  if (!evMap) {
+    evMap = L.map('event-map').setView([34.68, 131.95], 9);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(evMap);
+    evMapLayer = L.layerGroup().addTo(evMap);
+  }
+  setTimeout(() => { evMap.invalidateSize(); renderMapDay(); }, 80);
+}
+function closeMapModal() {
+  document.getElementById('map-modal').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+function bindMapListeners() {
+  document.getElementById('map-modal-close').addEventListener('click', closeMapModal);
+  document.getElementById('map-modal-overlay').addEventListener('click', closeMapModal);
+  document.getElementById('map-prev-day').addEventListener('click', () => shiftMapDay(-1));
+  document.getElementById('map-next-day').addEventListener('click', () => shiftMapDay(1));
+  document.getElementById('map-today-btn').addEventListener('click', () => {
+    mapDateStr = mapFmtDate(new Date());
+    renderMapDay();
+  });
+  document.getElementById('map-date-input').addEventListener('change', e => {
+    if (e.target.value) { mapDateStr = e.target.value; renderMapDay(); }
+  });
+}
+function shiftMapDay(delta) {
+  const d = mapParseDate(mapDateStr);
+  d.setDate(d.getDate() + delta);
+  mapDateStr = mapFmtDate(d);
+  renderMapDay();
+}
+function renderMapDay() {
+  const d = mapParseDate(mapDateStr);
+  const dow = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+  document.getElementById('map-date-label').textContent =
+    (d.getMonth() + 1) + '月' + d.getDate() + '日（' + dow + '）';
+  document.getElementById('map-date-input').value = mapDateStr;
+
+  const evs = allEvents.filter(ev =>
+    !ev.is_news && ev.date <= mapDateStr && (ev.end_date || ev.date) >= mapDateStr
+  );
+
+  evMapLayer.clearLayers();
+  const byCoord = {};
+  evs.forEach(ev => {
+    const c = coordForEvent(ev);
+    if (!c) return;
+    const key = c.join(',');
+    (byCoord[key] = byCoord[key] || []).push(ev);
+  });
+  Object.entries(byCoord).forEach(([key, group]) => {
+    const parts = key.split(',').map(Number);
+    group.forEach((ev, i) => {
+      let lat = parts[0], lng = parts[1];
+      if (group.length > 1) {
+        const a = (i / group.length) * Math.PI * 2;
+        lat += Math.sin(a) * 0.012;
+        lng += Math.cos(a) * 0.012;
+      }
+      const icon = L.divIcon({
+        className: 'map-pin-wrap',
+        html: '<div class="map-pin"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 20]
+      });
+      const marker = L.marker([lat, lng], { icon }).addTo(evMapLayer);
+      const period = (ev.end_date && ev.end_date !== ev.date)
+        ? ev.date + ' 〜 ' + ev.end_date : ev.date;
+      marker.bindPopup(
+        '<strong>' + esc(ev.title) + '</strong><br>' + period +
+        (ev.place ? '<br>' + esc(ev.place) : '') +
+        '<br><a href="#" class="map-popup-link" data-id="' + ev.id + '">詳細を見る</a>'
+      );
+    });
+  });
+
+  const list = document.getElementById('map-day-list');
+  list.innerHTML = '';
+  if (evs.length === 0) {
+    list.innerHTML = '<p class="map-empty">この日のイベントはありません。「次の日」で進んでみてください。</p>';
+    return;
+  }
+  const heading = document.createElement('p');
+  heading.className = 'map-list-heading';
+  heading.textContent = 'この日のイベント（' + evs.length + '件）';
+  list.appendChild(heading);
+  evs.forEach(ev => {
+    const row = document.createElement('button');
+    row.className = 'map-day-row';
+    row.innerHTML = '<span class="map-day-row-title">' + esc(ev.title) + '</span>' +
+      (ev.place ? '<span class="map-day-row-place">' + esc(ev.place) + '</span>' : '');
+    row.addEventListener('click', () => { closeMapModal(); openDetailModal(ev.id); });
+    list.appendChild(row);
+  });
+}
+document.addEventListener('click', e => {
+  const link = e.target.closest ? e.target.closest('.map-popup-link') : null;
+  if (link) {
+    e.preventDefault();
+    closeMapModal();
+    openDetailModal(link.dataset.id);
+  }
+});
