@@ -1442,3 +1442,39 @@ main { padding-bottom: 80px; }
 
 /* Leaflet: サイト全体の img ルールで地図タイルが崩れるのを防ぐ */
 #event-map img, .leaflet-pane img { max-width: none !important; }
+
+
+/* ===== 押した感触（サイト全体） ===== */
+button, .bottom-tab-item, .drawer-item, .sub-tab-btn, .map-day-row,
+.calendar-cell, .latest-card, .news-card, .agenda-event-row, .day-event-row {
+  -webkit-tap-highlight-color: transparent;
+}
+button, .bottom-tab-item, .drawer-item, .sub-tab-btn,
+.map-day-row, .map-nav-btn, .map-today-btn {
+  transition: transform 90ms ease, background-color 150ms ease,
+    box-shadow 150ms ease, opacity 150ms ease;
+}
+button:active, .map-day-row:active { transform: scale(0.95); }
+.calendar-cell, .latest-card, .news-card,
+.agenda-event-row, .day-event-row {
+  transition: transform 120ms ease, box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+.calendar-cell:active, .latest-card:active, .news-card:active,
+.agenda-event-row:active, .day-event-row:active {
+  transform: scale(0.97);
+  background-color: var(--color-surface);
+}
+.drawer-item:active, .bottom-tab-item:active, .sub-tab-btn:active {
+  background-color: var(--color-surface);
+}
+.map-pin { transition: transform 100ms ease; }
+.leaflet-marker-icon:active .map-pin { transform: rotate(-45deg) scale(0.82); }
+.leaflet-control-zoom-in:active, .leaflet-control-zoom-out:active {
+  background-color: #e5e7eb !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  button, .bottom-tab-item, .drawer-item, .sub-tab-btn, .map-day-row,
+  .calendar-cell, .latest-card, .news-card, .agenda-event-row, .day-event-row,
+  .map-pin { transition: none !important; }
+}
