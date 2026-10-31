@@ -37,6 +37,7 @@ async function init() {
 
   setupCalendarNav();
   setupModalListeners();
+  setupLatestCardFocus();
   setupAuth();      // admin.js で定義
   await loadEvents();
 }
@@ -207,6 +208,7 @@ function renderLatest() {
     return;
   }
   evs.forEach(ev => container.appendChild(buildLatestCard(ev)));
+  scheduleLatestCardFocus();
 }
 
 function buildLatestCard(ev) {
@@ -258,6 +260,52 @@ function buildLatestCard(ev) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetailModal(ev.id); }
   });
   return card;
+}
+
+// 横スワイプ：中央に近いカードを少し大きく見せる
+let latestFocusFrame = null;
+
+function updateLatestCardFocus() {
+  const container = document.getElementById('latest-scroll');
+  if (!container) return;
+  const cards = container.querySelectorAll('.latest-card');
+  if (cards.length === 0) return;
+
+  const center = container.scrollLeft + container.clientWidth / 2;
+  let front = null;
+  let frontDistance = Infinity;
+
+  cards.forEach(card => {
+    const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+    const distance = Math.abs(cardCenter - center);
+    const range = Math.max((card.offsetWidth + 10) * 1.15, 1);
+    const closeness = Math.max(0, 1 - distance / range);
+    const scale = 0.94 + closeness * 0.08;
+    card.style.setProperty('--latest-scale', scale.toFixed(3));
+    card.style.setProperty('--latest-opacity', (0.76 + closeness * 0.24).toFixed(3));
+    if (distance < frontDistance) {
+      frontDistance = distance;
+      front = card;
+    }
+  });
+
+  cards.forEach(card => card.classList.toggle('is-front', card === front));
+}
+
+function scheduleLatestCardFocus() {
+  if (latestFocusFrame !== null) return;
+  latestFocusFrame = requestAnimationFrame(() => {
+    latestFocusFrame = null;
+    updateLatestCardFocus();
+  });
+}
+
+function setupLatestCardFocus() {
+  const container = document.getElementById('latest-scroll');
+  if (!container || container.dataset.focusReady) return;
+  container.dataset.focusReady = '1';
+  container.addEventListener('scroll', scheduleLatestCardFocus, { passive: true });
+  window.addEventListener('resize', scheduleLatestCardFocus);
 }
 
 // ===================================================================
