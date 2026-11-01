@@ -548,6 +548,10 @@ function buildNewsCard(ev) {
   const card = document.createElement('div');
   card.className = 'news-card';
 
+  // 左カラム（サムネイル＋日付）
+  const side = document.createElement('div');
+  side.className = 'news-card-side';
+
   // サムネイル（image_url 優先、なければ images[0]）
   const thumbUrl = ev.image_url || (ev.images && ev.images[0]);
   if (thumbUrl) {
@@ -556,18 +560,24 @@ function buildNewsCard(ev) {
     img.src = thumbUrl;
     img.alt = ev.title;
     img.loading = 'lazy';
-    card.appendChild(img);
+    side.appendChild(img);
   } else {
     const ph = document.createElement('div');
     ph.className = 'news-card-img-placeholder';
     ph.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
-    card.appendChild(ph);
+    side.appendChild(ph);
   }
+
+  const dateEl = document.createElement('span');
+  dateEl.className = 'news-card-date';
+  dateEl.textContent = formatDateJa(ev.date);
+  side.appendChild(dateEl);
+  card.appendChild(side);
 
   const body = document.createElement('div');
   body.className = 'news-card-body';
 
-  // 出典・日付行
+  // 出典行（日付は写真の下に表示）
   const meta = document.createElement('div');
   meta.className = 'news-card-meta';
   if (STORE_KEYWORDS.test(ev.title + (ev.comment || ''))) {
@@ -582,10 +592,6 @@ function buildNewsCard(ev) {
     src.textContent = ev.place;
     meta.appendChild(src);
   }
-  const dateEl = document.createElement('span');
-  dateEl.className = 'news-card-date';
-  dateEl.textContent = formatDateJa(ev.date);
-  meta.appendChild(dateEl);
   body.appendChild(meta);
 
   const titleEl = document.createElement('div');
