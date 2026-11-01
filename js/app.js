@@ -606,16 +606,6 @@ function buildNewsCard(ev) {
     body.appendChild(desc);
   }
 
-  if (ev.link) {
-    const linkEl = document.createElement('a');
-    linkEl.className = 'news-card-link';
-    linkEl.href = ev.link;
-    linkEl.target = '_blank';
-    linkEl.rel = 'noopener noreferrer';
-    linkEl.textContent = '詳しくはこちら →';
-    body.appendChild(linkEl);
-  }
-
   card.appendChild(body);
 
   card.addEventListener('click', e => {
