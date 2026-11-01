@@ -612,7 +612,7 @@ function buildNewsCard(ev) {
     linkEl.href = ev.link;
     linkEl.target = '_blank';
     linkEl.rel = 'noopener noreferrer';
-    linkEl.textContent = `詳しくはこちら${ev.place ? `（${ev.place}）` : ''} →`;
+    linkEl.textContent = '詳しくはこちら →';
     body.appendChild(linkEl);
   }
 
