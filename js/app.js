@@ -126,6 +126,22 @@ function occursOnDate(ev, dateStr) {
   return true;
 }
 
+// 「水曜日は休館日です」を赤字で目立たせる（2026-11-02 ユーザー希望）
+function appendCommentText(el, text) {
+  const TARGET = '水曜日は休館日です';
+  let rest = String(text || '');
+  while (rest.length > 0) {
+    const i = rest.indexOf(TARGET);
+    if (i === -1) { el.appendChild(document.createTextNode(rest)); break; }
+    if (i > 0) el.appendChild(document.createTextNode(rest.slice(0, i)));
+    const s = document.createElement('span');
+    s.className = 'text-alert';
+    s.textContent = TARGET;
+    el.appendChild(s);
+    rest = rest.slice(i + TARGET.length);
+  }
+}
+
 function pad2(n) { return String(n).padStart(2, '0'); }
 
 function formatDate(d) {
@@ -627,7 +643,7 @@ function buildNewsCard(ev) {
   if (ev.comment) {
     const desc = document.createElement('div');
     desc.className = 'news-card-desc';
-    desc.textContent = ev.comment;
+    appendCommentText(desc, ev.comment);
     body.appendChild(desc);
   }
 
@@ -804,7 +820,7 @@ async function openDetailModal(id) {
   if (ev.comment) {
     const commentEl = document.createElement('p');
     commentEl.className = 'detail-comment';
-    commentEl.textContent = ev.comment;
+    appendCommentText(commentEl, ev.comment);
     body.appendChild(commentEl);
   }
 

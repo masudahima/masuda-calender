@@ -452,6 +452,7 @@ body.loading::before {
 }
 .list-title .new-badge { margin-left: 6px; }
 .latest-card-body .new-badge { margin-left: 4px; }
+.text-alert { color: var(--color-error); font-weight: 700; }
 .sub-tab-btn--store { color: #b91c1c; }
 .sub-tab-btn--store.active { background: #fee2e2; color: #b91c1c; border-color: #b91c1c; }
 .drawer-item--store { color: #b91c1c; font-weight: 700; }
