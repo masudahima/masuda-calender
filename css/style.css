@@ -442,6 +442,16 @@ body.loading::before {
 .news-card-date { font-size: 11px; color: var(--color-text-light); }
 .news-card-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
 .news-card-tag--store { background: #fee2e2; color: #b91c1c; }
+.new-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  background: var(--color-error); color: #fff;
+  padding: 2px 6px; border-radius: 4px;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+.list-title .new-badge { margin-left: 6px; }
+.latest-card-body .new-badge { margin-left: 4px; }
 .sub-tab-btn--store { color: #b91c1c; }
 .sub-tab-btn--store.active { background: #fee2e2; color: #b91c1c; border-color: #b91c1c; }
 .drawer-item--store { color: #b91c1c; font-weight: 700; }

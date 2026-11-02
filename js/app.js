@@ -104,6 +104,19 @@ function getImages(ev) {
   return [];
 }
 
+// 新着バッジ: サイトに登録されてから3日以内のものに出す（2026-11-02 ユーザー希望）
+function isNewItem(ev) {
+  if (!ev.created_at) return false;
+  return (Date.now() - new Date(ev.created_at).getTime()) <= 3 * 24 * 60 * 60 * 1000;
+}
+
+function buildNewBadge() {
+  const b = document.createElement('span');
+  b.className = 'new-badge';
+  b.textContent = '新着';
+  return b;
+}
+
 function pad2(n) { return String(n).padStart(2, '0'); }
 
 function formatDate(d) {
@@ -268,6 +281,7 @@ function buildLatestCard(ev) {
     area.textContent = ev.area;
     body.appendChild(area);
   }
+  if (isNewItem(ev)) body.appendChild(buildNewBadge());
 
   const title = document.createElement('div');
   title.className = 'latest-card-title';
@@ -403,6 +417,7 @@ function buildListItem(ev) {
   const titleEl = document.createElement('div');
   titleEl.className = 'list-title';
   titleEl.textContent = ev.title;
+  if (isNewItem(ev)) titleEl.appendChild(buildNewBadge());
   info.appendChild(titleEl);
 
   if (ev.end_date && ev.end_date !== ev.date) {
@@ -580,6 +595,7 @@ function buildNewsCard(ev) {
   // 出典行（日付は写真の下に表示）
   const meta = document.createElement('div');
   meta.className = 'news-card-meta';
+  if (isNewItem(ev)) meta.appendChild(buildNewBadge());
   if (STORE_KEYWORDS.test(ev.title + (ev.comment || ''))) {
     const tag = document.createElement('span');
     tag.className = 'news-card-tag news-card-tag--store';
