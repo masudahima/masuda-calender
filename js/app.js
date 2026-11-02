@@ -757,10 +757,13 @@ async function openDetailModal(id) {
   const meta = document.createElement('div');
   meta.className = 'detail-meta';
 
+  // ニュースは開催日と混同しないよう、date を「報道日」と表示する（2026-11-02 ユーザー指示）
   const rows = [
-    ['日時', ev.end_date && ev.end_date !== ev.date
-      ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
-      : formatDateJa(ev.date)],
+    ev.is_news
+      ? ['報道日', formatDateJa(ev.date)]
+      : ['日時', ev.end_date && ev.end_date !== ev.date
+        ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
+        : formatDateJa(ev.date)],
     ev.place ? [ev.is_news ? '出典' : '場所', ev.place] : null,
     ev.area  ? ['エリア', ev.area] : null,
   ].filter(Boolean);
