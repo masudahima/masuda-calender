@@ -117,6 +117,15 @@ function buildNewBadge() {
   return b;
 }
 
+// おおかみ写真展は水曜休館: カレンダー・日付モーダル・地図で水曜日に出さない（2026-11-02 ユーザー指示）
+const CLOSED_WED_EVENT_ID = '45c75908-9dec-4457-89e9-23fb975775f4';
+function occursOnDate(ev, dateStr) {
+  const end = ev.end_date || ev.date;
+  if (ev.date > dateStr || end < dateStr) return false;
+  if (ev.id === CLOSED_WED_EVENT_ID && new Date(dateStr + 'T00:00:00').getDay() === 3) return false;
+  return true;
+}
+
 function pad2(n) { return String(n).padStart(2, '0'); }
 
 function formatDate(d) {
@@ -172,7 +181,7 @@ function renderCalendar(year, month) {
     if (ev.date > monthEnd || end < monthStart) continue;
     for (let d = 1; d <= lastDay; d++) {
       const ds = `${prefix}${pad2(d)}`;
-      if (ds >= ev.date && ds <= end) {
+      if (ds >= ev.date && ds <= end && occursOnDate(ev, ds)) {
         (byDate[ds] = byDate[ds] || []).push(ev);
       }
     }
@@ -639,8 +648,7 @@ function openDayModal(dateStr) {
 
   const evs   = allEvents.filter(ev => {
     if (ev.is_news) return false;
-    const end = ev.end_date || ev.date;
-    return ev.date <= dateStr && end >= dateStr;
+    return occursOnDate(ev, dateStr);
   });
   const listEl = document.getElementById('day-modal-events');
   listEl.innerHTML = '';
@@ -1258,7 +1266,7 @@ function renderMapDay() {
   document.getElementById('map-date-input').value = mapDateStr;
 
   const evs = allEvents.filter(ev =>
-    !ev.is_news && ev.date <= mapDateStr && (ev.end_date || ev.date) >= mapDateStr
+    !ev.is_news && occursOnDate(ev, mapDateStr)
   );
 
   evMapLayer.clearLayers();
