@@ -104,6 +104,18 @@ function getImages(ev) {
   return [];
 }
 
+// Storageの画像は一覧表示では小さい版（-s）を使い、転送量を抑える（2026-11-03 対策）
+function smallImgUrl(url) {
+  if (!url || !url.includes('/storage/v1/object/public/event-images/')) return url;
+  if (/-s\.jpe?g$/i.test(url)) return url;
+  return url.replace(/\.(jpe?g|png)$/i, '-s.jpg');
+}
+function setThumbImg(img, url) {
+  const t = smallImgUrl(url);
+  if (t !== url) img.onerror = () => { img.onerror = null; img.src = url; };
+  img.src = t;
+}
+
 // 新着バッジ: サイトに登録されてから3日以内のものに出す（2026-11-02 ユーザー希望）
 function isNewItem(ev) {
   if (!ev.created_at) return false;
@@ -287,7 +299,7 @@ function buildLatestCard(ev) {
   imgWrap.className = 'latest-card-img';
   if (imgs.length > 0) {
     const img = document.createElement('img');
-    img.src = imgs[0];
+    setThumbImg(img, imgs[0]);
     img.alt = ev.title;
     img.loading = 'lazy';
     imgWrap.appendChild(img);
@@ -430,7 +442,7 @@ function buildListItem(ev) {
   if (imgs.length > 0) {
     const img = document.createElement('img');
     img.className = 'list-thumb';
-    img.src = imgs[0];
+    setThumbImg(img, imgs[0]);
     img.alt = ev.title;
     img.loading = 'lazy';
     item.appendChild(img);
@@ -597,7 +609,7 @@ function buildNewsCard(ev) {
   if (thumbUrl) {
     const img = document.createElement('img');
     img.className = 'news-card-img';
-    img.src = thumbUrl;
+    setThumbImg(img, thumbUrl);
     img.alt = ev.title;
     img.loading = 'lazy';
     side.appendChild(img);
@@ -709,7 +721,7 @@ function buildDayEventRow(ev) {
     imgWrap.className = 'day-event-thumb-wrap';
     const img = document.createElement('img');
     img.className = 'day-event-thumb';
-    img.src = imgs[0];
+    setThumbImg(img, imgs[0]);
     img.alt = ev.title;
     img.loading = 'lazy';
     imgWrap.appendChild(img);
