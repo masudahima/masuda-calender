@@ -537,6 +537,60 @@ function renderOshirase() {
   });
 }
 
+// ニュースは1ページ10件ずつ表示し、11件目以降は次のページに回す（2026-11-03 ユーザー希望）
+const NEWS_PER_PAGE = 10;
+const newsPageState = { all: 1, masuda: 1, hamada: 1, tsuwano: 1, shintenpo: 1 };
+let newsListsCache = { all: [], masuda: [], hamada: [], tsuwano: [], shintenpo: [] };
+
+function fillNewsPanel(areaKey, listEl, emptyMsg) {
+  const items = newsListsCache[areaKey] || [];
+  listEl.innerHTML = '';
+  if (items.length === 0) {
+    if (emptyMsg) listEl.innerHTML = `<p class="empty-msg">${emptyMsg}</p>`;
+    return;
+  }
+  const totalPages = Math.ceil(items.length / NEWS_PER_PAGE);
+  let page = newsPageState[areaKey] || 1;
+  if (page > totalPages) page = totalPages;
+  if (page < 1) page = 1;
+  newsPageState[areaKey] = page;
+  items.slice((page - 1) * NEWS_PER_PAGE, page * NEWS_PER_PAGE)
+    .forEach(ev => listEl.appendChild(buildNewsCard(ev)));
+  if (totalPages > 1) listEl.appendChild(buildNewsPager(areaKey, page, totalPages));
+}
+
+function buildNewsPager(areaKey, page, totalPages) {
+  const pager = document.createElement('div');
+  pager.className = 'news-pager';
+  const prev = document.createElement('button');
+  prev.type = 'button';
+  prev.className = 'news-pager-btn';
+  prev.textContent = '前へ';
+  prev.disabled = page <= 1;
+  prev.addEventListener('click', () => setNewsPage(areaKey, page - 1));
+  const label = document.createElement('span');
+  label.className = 'news-pager-label';
+  label.textContent = `${page} / ${totalPages}`;
+  const next = document.createElement('button');
+  next.type = 'button';
+  next.className = 'news-pager-btn';
+  next.textContent = '次へ';
+  next.disabled = page >= totalPages;
+  next.addEventListener('click', () => setNewsPage(areaKey, page + 1));
+  pager.appendChild(prev);
+  pager.appendChild(label);
+  pager.appendChild(next);
+  return pager;
+}
+
+function setNewsPage(areaKey, page) {
+  newsPageState[areaKey] = page;
+  const listEl = document.getElementById(`news-${areaKey}-list`);
+  if (listEl) fillNewsPanel(areaKey, listEl, '');
+  const section = document.getElementById('news-section');
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderNews() {
   const newsEvs = allEvents.filter(ev => ev.is_news && !ev.title.startsWith('お知らせ：'));
 
@@ -567,33 +621,12 @@ function renderNews() {
   const tsuwanoList   = document.getElementById('news-tsuwano-list');
   const shintenpoList = document.getElementById('news-shintenpo-list');
 
-  allList.innerHTML = masudaList.innerHTML = hamadaList.innerHTML = tsuwanoList.innerHTML = shintenpoList.innerHTML = '';
-
-  if (recent.length > 0) {
-    recent.forEach(ev => allList.appendChild(buildNewsCard(ev)));
-  } else {
-    allList.innerHTML = '<p class="empty-msg">ニュースはありません。</p>';
-  }
-
-  if (masuda.length > 0) {
-    masuda.forEach(ev => masudaList.appendChild(buildNewsCard(ev)));
-  } else {
-    masudaList.innerHTML = '<p class="empty-msg">益田市のニュースはありません。</p>';
-  }
-
-  if (hamada.length > 0) {
-    hamada.forEach(ev => hamadaList.appendChild(buildNewsCard(ev)));
-  } else {
-    hamadaList.innerHTML = '<p class="empty-msg">浜田市のニュースはありません。</p>';
-  }
-
-  if (tsuwano.length > 0) {
-    tsuwano.forEach(ev => tsuwanoList.appendChild(buildNewsCard(ev)));
-  } else {
-    tsuwanoList.innerHTML = '<p class="empty-msg">津和野町のニュースはありません。</p>';
-  }
-
-  shintenpo.forEach(ev => shintenpoList.appendChild(buildNewsCard(ev)));
+  newsListsCache = { all: recent, masuda, hamada, tsuwano, shintenpo };
+  fillNewsPanel('all', allList, 'ニュースはありません。');
+  fillNewsPanel('masuda', masudaList, '益田市のニュースはありません。');
+  fillNewsPanel('hamada', hamadaList, '浜田市のニュースはありません。');
+  fillNewsPanel('tsuwano', tsuwanoList, '津和野町のニュースはありません。');
+  fillNewsPanel('shintenpo', shintenpoList, '');
 }
 
 function buildNewsCard(ev) {
