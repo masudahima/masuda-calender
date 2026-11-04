@@ -549,7 +549,7 @@ body.loading::before {
 .meta-item       { display: flex; align-items: flex-start; gap: 5px; font-size: 13px; color: var(--color-text-muted); }
 .meta-item svg   { flex-shrink: 0; margin-top: 2px; color: var(--color-text-light); }
 
-.detail-comment  { font-size: 14px; color: var(--color-text); line-height: 1.7; white-space: pre-wrap; }
+.detail-comment  { font-size: 16px; color: var(--color-text); line-height: 1.95; white-space: pre-wrap; }
 
 .detail-admin-actions {
   display: flex;
@@ -1066,7 +1066,7 @@ body.modal-open { overflow: hidden; }
 .sub-tab-note { font-size: 11px; opacity: 0.8; }
 
 /* ===== Detail modal extras ===== */
-.detail-meta-row { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--color-text-muted); }
+.detail-meta-row { display: flex; align-items: flex-start; gap: 8px; font-size: 15px; line-height: 1.6; color: var(--color-text-muted); }
 .detail-meta-label { font-weight: 600; color: var(--color-text); flex-shrink: 0; min-width: 36px; }
 .detail-link {
   display: inline-block;
@@ -1606,3 +1606,12 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 
 /* ニュースの報道日（薄いグレー・小さめ、開催日と混同させない） */
 .detail-reported { font-size: 12px; color: #9aa0a6; margin-top: -8px; }
+
+/* 記事（詳細モーダル）の読みやすさ改善（2026-11-04、40〜50代の読者向け） */
+.detail-title { font-size: 21px; line-height: 1.5; }
+.detail-link { font-size: 15px; }
+.detail-reported { font-size: 13px; }
+
+/* 共有ボタン */
+.detail-share-btn { display: block; width: 100%; padding: 11px; border: 1.5px solid var(--color-primary); background: #fff; color: var(--color-primary); border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.detail-share-btn:active { opacity: 0.7; }

@@ -43,6 +43,10 @@ async function init() {
   setupTodayFilter();
   setupAuth();      // admin.js で定義
   await loadEvents();
+
+  // 共有リンク（?e=<id>）で開かれたら、その記事を直接表示する
+  const sharedId = new URLSearchParams(location.search).get('e');
+  if (sharedId) openDetailModal(sharedId);
 }
 
 // ===================================================================
@@ -911,6 +915,13 @@ async function openDetailModal(id) {
     body.appendChild(linkEl);
   }
 
+  // 共有ボタン（記事への直リンクを共有／コピーする）
+  const shareBtn = document.createElement('button');
+  shareBtn.className = 'detail-share-btn';
+  shareBtn.textContent = '共有する';
+  shareBtn.addEventListener('click', () => shareEvent(ev));
+  body.appendChild(shareBtn);
+
   // 管理ボタン（ログイン中のみ）
   const sess = await supabaseClient.auth.getSession();
   if (sess?.data?.session) {
@@ -950,6 +961,19 @@ async function openDetailModal(id) {
 
   modal.hidden = false;
   document.body.classList.add('modal-open');
+}
+
+function shareEvent(ev) {
+  const url = `${location.origin}${location.pathname}?e=${ev.id}`;
+  if (navigator.share) {
+    navigator.share({ title: ev.title, text: ev.title, url }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url)
+      .then(() => showToast('リンクをコピーしました'))
+      .catch(() => showToast('コピーできませんでした', 'error'));
+  } else {
+    showToast('このブラウザでは共有できません', 'error');
+  }
 }
 
 function closeDetailModal() {
