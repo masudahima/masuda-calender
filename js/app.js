@@ -165,6 +165,28 @@ function formatDateJa(dateStr) {
   return `${d.getMonth() + 1}月${d.getDate()}日（${DAY_NAMES[d.getDay()]}）`;
 }
 
+// ニュース本文の「日時：…」から開催日（M月D日）を抜き出す。期間は開始・終了の両日を返す
+function extractEventDates(comment) {
+  if (!comment) return [];
+  const out = [];
+  const push = (mo, dd) => {
+    const s = `${Number(mo)}月${Number(dd)}日`;
+    if (!out.includes(s)) out.push(s);
+  };
+  const segRe = /日時[：は]([^。]*)/g;
+  let m;
+  while ((m = segRe.exec(comment))) {
+    const seg = m[1];
+    const first = seg.match(/(\d{1,2})月(\d{1,2})日/);
+    if (!first) continue;
+    push(first[1], first[2]);
+    const rest = seg.slice(seg.indexOf(first[0]) + first[0].length);
+    const range = rest.match(/〜\s*(?:(\d{1,2})月)?\s*(\d{1,2})日/);
+    if (range) push(range[1] || first[1], range[2]);
+  }
+  return out;
+}
+
 function todayStr() { return formatDate(new Date()); }
 
 function esc(str) {
@@ -655,7 +677,9 @@ function buildNewsCard(ev) {
 
   const dateEl = document.createElement('span');
   dateEl.className = 'news-card-date';
-  dateEl.textContent = formatDateJa(ev.date);
+  // 開催日と混同しないよう「M/Dのニュース」と表示する（2026-11-04 ユーザー指示）
+  const dp = ev.date.split('-');
+  dateEl.textContent = `${Number(dp[1])}/${Number(dp[2])}のニュース`;
   side.appendChild(dateEl);
   card.appendChild(side);
 
@@ -842,10 +866,17 @@ async function openDetailModal(id) {
   const meta = document.createElement('div');
   meta.className = 'detail-meta';
 
-  // ニュースは開催日と混同しないよう、date を「報道日」と表示する（2026-11-02 ユーザー指示）
+  // ニュース: 報道日は薄いグレーで小さく別表示し、本文の「日時：」から開催日を表示する（2026-11-04 ユーザー指示）
+  if (ev.is_news) {
+    const rep = document.createElement('div');
+    rep.className = 'detail-reported';
+    rep.textContent = `報道日 ${formatDateJa(ev.date)}`;
+    body.appendChild(rep);
+  }
+  const eventDates = ev.is_news ? extractEventDates(ev.comment) : [];
   const rows = [
     ev.is_news
-      ? ['報道日', formatDateJa(ev.date)]
+      ? (eventDates.length ? ['開催日', eventDates.join('／')] : null)
       : ['日時', ev.end_date && ev.end_date !== ev.date
         ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
         : formatDateJa(ev.date)],

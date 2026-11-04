@@ -1603,3 +1603,6 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 @media (max-width: 380px) {
   .today-filter-btn { font-size: 11px; padding: 6px 9px; }
 }
+
+/* ニュースの報道日（薄いグレー・小さめ、開催日と混同させない） */
+.detail-reported { font-size: 12px; color: #9aa0a6; margin-top: -8px; }
