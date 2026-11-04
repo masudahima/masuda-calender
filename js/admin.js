@@ -33,9 +33,10 @@ function setupAuth() {
     showToast('ログアウトしました', 'info');
   });
 
-  // 「イベント登録」ボタン（日付パネル内）
-  document.getElementById('day-register-btn').addEventListener('click', async () => {
-    const date = document.getElementById('day-register-btn').dataset.date;
+  // 「イベント登録」ボタン（日付パネル内）※2026-11-04 ボタン廃止。登録は Muse 経由のみ
+  const dayRegisterBtn = document.getElementById('day-register-btn');
+  if (dayRegisterBtn) dayRegisterBtn.addEventListener('click', async () => {
+    const date = dayRegisterBtn.dataset.date;
     const sess = await supabaseClient.auth.getSession();
     if (sess?.data?.session) {
       // ログイン済み → フォームを直接開く

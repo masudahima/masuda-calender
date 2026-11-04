@@ -758,9 +758,6 @@ function openDayModal(dateStr) {
     evs.forEach(ev => listEl.appendChild(buildDayEventRow(ev)));
   }
 
-  // 「イベント登録」ボタンに日付を渡す
-  document.getElementById('day-register-btn').dataset.date = dateStr;
-
   // スクロールヒント
   const hint = document.getElementById('day-scroll-hint');
   const modalContent = document.querySelector('#day-modal .modal-content');
