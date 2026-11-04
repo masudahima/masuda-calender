@@ -158,6 +158,16 @@ function appendCommentText(el, text) {
   }
 }
 
+// 本文を一文ごとに分ける（「。」で区切り、段落ごとに間を空けて表示するため）
+function splitSentences(text) {
+  const out = [];
+  String(text || '').split(/\n+/).forEach(line => {
+    const parts = line.match(/[^。！？]*[。！？]|[^。！？]+/g) || [];
+    parts.forEach(p => { const t = p.trim(); if (t) out.push(t); });
+  });
+  return out;
+}
+
 function pad2(n) { return String(n).padStart(2, '0'); }
 
 function formatDate(d) {
@@ -896,11 +906,16 @@ async function openDetailModal(id) {
   });
   body.appendChild(meta);
 
-  // コメント
+  // コメント（一文ごとに改行し、文の間を空けて読みやすくする）
   if (ev.comment) {
-    const commentEl = document.createElement('p');
+    const commentEl = document.createElement('div');
     commentEl.className = 'detail-comment';
-    appendCommentText(commentEl, ev.comment);
+    splitSentences(ev.comment).forEach(s => {
+      const p = document.createElement('p');
+      p.className = 'detail-sentence';
+      appendCommentText(p, s);
+      commentEl.appendChild(p);
+    });
     body.appendChild(commentEl);
   }
 
