@@ -143,19 +143,41 @@ function occursOnDate(ev, dateStr) {
 }
 
 // 「水曜日は休館日です」を赤字で目立たせる（2026-11-02 ユーザー希望）
+// 本文中のURLはタップできるリンクにする（2026-11-09 ユーザー希望）
 function appendCommentText(el, text) {
   const TARGET = '水曜日は休館日です';
-  let rest = String(text || '');
-  while (rest.length > 0) {
-    const i = rest.indexOf(TARGET);
-    if (i === -1) { el.appendChild(document.createTextNode(rest)); break; }
-    if (i > 0) el.appendChild(document.createTextNode(rest.slice(0, i)));
-    const s = document.createElement('span');
-    s.className = 'text-alert';
-    s.textContent = TARGET;
-    el.appendChild(s);
-    rest = rest.slice(i + TARGET.length);
+  const appendPlain = (str) => {
+    let rest = String(str || '');
+    while (rest.length > 0) {
+      const i = rest.indexOf(TARGET);
+      if (i === -1) { el.appendChild(document.createTextNode(rest)); break; }
+      if (i > 0) el.appendChild(document.createTextNode(rest.slice(0, i)));
+      const s = document.createElement('span');
+      s.className = 'text-alert';
+      s.textContent = TARGET;
+      el.appendChild(s);
+      rest = rest.slice(i + TARGET.length);
+    }
+  };
+  const src = String(text || '');
+  const urlRe = /https?:\/\/[^\s<>"'）】」、。]+/g;
+  let last = 0;
+  let m;
+  while ((m = urlRe.exec(src))) {
+    if (m.index > last) appendPlain(src.slice(last, m.index));
+    const a = document.createElement('a');
+    a.className = 'comment-link';
+    a.href = m[0];
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.color = '#1d4ed8';
+    a.style.textDecoration = 'underline';
+    a.style.wordBreak = 'break-all';
+    a.textContent = m[0];
+    el.appendChild(a);
+    last = m.index + m[0].length;
   }
+  if (last < src.length) appendPlain(src.slice(last));
 }
 
 // 本文を一文ごとに分ける（「。」で区切り、段落ごとに間を空けて表示するため）
