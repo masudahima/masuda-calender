@@ -387,11 +387,23 @@ function getSorted(list) {
 
 
 const DOW = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+// 国民の祝日（内閣府発表）。「祝日の場合は翌日」型の定休日の判定にだけ使う
+const HOLIDAYS = new Set(['2026-01-01','2026-01-12','2026-02-11','2026-02-23','2026-03-20','2026-04-29','2026-05-03','2026-05-04','2026-05-05','2026-05-06','2026-07-20','2026-08-11','2026-09-21','2026-09-22','2026-09-23','2026-10-12','2026-11-03','2026-11-23','2027-01-01','2027-01-11','2027-02-11','2027-02-23','2027-03-21','2027-03-22','2027-04-29','2027-05-03','2027-05-04','2027-05-05','2027-07-19','2027-08-11','2027-09-20','2027-09-23','2027-10-11','2027-11-03','2027-11-23']);
+function dateKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function isHoliday(d) { return HOLIDAYS.has(dateKey(d)); }
+function jstNow() { return new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Tokyo'})); }
 function isClosedToday(s, now) {
   const c = s.closed || '';
   if (!c || c.includes('なし') || c.includes('不定休')) return false;
   const wm = c.match(/([日月火水木金土])曜日/);
   if (!wm) return false;
+  if (c.includes('翌日')) {
+    // 定休日が祝日と重なったら翌日にずれる型（例：毎週月曜日（祝日の場合は翌日））
+    const base = DOW[wm[1]];
+    if (now.getDay() === base) return !isHoliday(now);
+    if (now.getDay() === (base + 1) % 7) { const y = new Date(now); y.setDate(y.getDate() - 1); return isHoliday(y); }
+    return false;
+  }
   if (DOW[wm[1]] !== now.getDay()) return false;
   if (c.includes('第')) {
     const list = [...c.matchAll(/第([1-5])/g)].map(x => +x[1]);
@@ -408,7 +420,7 @@ function todayHours(s, now) {
   return [o, c];
 }
 function statusOf(s) {
-  const now = new Date();
+  const now = jstNow();
   if (isClosedToday(s, now)) return {label:'定休日', cls:'closed', open:false};
   const t = todayHours(s, now);
   const mins = now.getHours() * 60 + now.getMinutes();
