@@ -400,11 +400,27 @@ function buildLatestCard(ev, idx) {
   card.setAttribute('role', 'button');
   card.setAttribute('tabindex', '0');
 
-  // もこもこシール（エリア）
+  // もこもこシール（エリア）: 益田市の地区は「益田市（地区名）」の2行表示
   if (ev.area) {
     const seal = document.createElement('div');
     seal.className = 'latest-card-seal';
-    seal.textContent = ev.area;
+    seal.dataset.area = ev.area;
+    const sealText = document.createElement('span');
+    sealText.className = 'latest-card-seal-text';
+    if (ev.area === '匹見' || ev.area === '美都' || ev.area === '市街地') {
+      seal.classList.add('seal-multi');
+      const l1 = document.createElement('span');
+      l1.className = 'seal-line1';
+      l1.textContent = '益田市';
+      const l2 = document.createElement('span');
+      l2.className = 'seal-line2';
+      l2.textContent = '（' + ev.area + '）';
+      sealText.appendChild(l1);
+      sealText.appendChild(l2);
+    } else {
+      sealText.textContent = ev.area;
+    }
+    seal.appendChild(sealText);
     card.appendChild(seal);
   }
 
@@ -487,7 +503,7 @@ function updateLatestCardFocus() {
 //  スライドレーン: ゆっくり自動で流れる（触ると止まる）
 // ===================================================================
 const LATEST_AUTO_SPEED = 27; // px/秒
-const latestAuto = { raf: null, last: 0, resumeAt: 0, bound: false };
+const latestAuto = { raf: null, last: 0, resumeAt: 0, bound: false, pos: null };
 
 function latestAutoWanted() {
   return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -498,6 +514,7 @@ function startLatestAuto() {
   if (!container || container.dataset.loop !== '1') return;
   if (latestAuto.raf !== null) return;
   latestAuto.last = performance.now();
+  latestAuto.pos = container.scrollLeft;
   const step = (now) => {
     latestAuto.raf = requestAnimationFrame(step);
     const dt = Math.min(now - latestAuto.last, 100);
@@ -506,8 +523,14 @@ function startLatestAuto() {
     if (now < latestAuto.resumeAt) return;
     const half = container.scrollWidth / 2;
     if (half <= 0) return;
-    container.scrollLeft += (LATEST_AUTO_SPEED * dt) / 1000;
-    if (container.scrollLeft >= half) container.scrollLeft -= half;
+    // 手で動かされていたら、その位置から再開する
+    if (Math.abs(container.scrollLeft - latestAuto.pos) > 2) {
+      latestAuto.pos = container.scrollLeft;
+    }
+    // 位置は小数で貯めてから代入する（端数の代入はブラウザが切り捨てて進まなくなるため）
+    latestAuto.pos += (LATEST_AUTO_SPEED * dt) / 1000;
+    if (latestAuto.pos >= half) latestAuto.pos -= half;
+    container.scrollLeft = latestAuto.pos;
   };
   latestAuto.raf = requestAnimationFrame(step);
 }
@@ -517,6 +540,7 @@ function stopLatestAuto() {
     cancelAnimationFrame(latestAuto.raf);
     latestAuto.raf = null;
   }
+  latestAuto.pos = null;
 }
 
 function setupLatestAutoScroll() {
