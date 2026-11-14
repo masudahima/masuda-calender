@@ -821,11 +821,27 @@ function renderNews() {
   fillNewsPanel('shintenpo', shintenpoList, '');
 }
 
+// ニュースのシール表記（市名の短い形）
+const NEWS_AREA_LABEL = {
+  '市街地': '益田', '美都': '益田', '匹見': '益田',
+  '浜田市': '浜田', '津和野': '津和野', '吉賀': '吉賀'
+};
+
 function buildNewsCard(ev) {
   const card = document.createElement('div');
   card.className = 'news-card';
 
-  // 左カラム（サムネイル＋日付）
+  // もこもこシール（エリア）
+  const seal = document.createElement('div');
+  seal.className = 'news-card-seal';
+  seal.dataset.label = NEWS_AREA_LABEL[ev.area] || 'その他';
+  const sealText = document.createElement('span');
+  sealText.className = 'news-card-seal-text';
+  sealText.textContent = seal.dataset.label;
+  seal.appendChild(sealText);
+  card.appendChild(seal);
+
+  // 左カラム（サムネイル）
   const side = document.createElement('div');
   side.className = 'news-card-side';
 
@@ -845,20 +861,20 @@ function buildNewsCard(ev) {
     side.appendChild(ph);
   }
 
-  const dateEl = document.createElement('span');
-  dateEl.className = 'news-card-date';
-  // 開催日と混同しないよう「M/Dのニュース」と表示する（2026-11-04 ユーザー指示）
-  const dp = ev.date.split('-');
-  dateEl.textContent = `${Number(dp[1])}/${Number(dp[2])}のニュース`;
-  side.appendChild(dateEl);
   card.appendChild(side);
 
   const body = document.createElement('div');
   body.className = 'news-card-body';
 
-  // 出典行（日付は写真の下に表示）
+  // メタ行（日付ピル＋新着＋タグ＋出典）
   const meta = document.createElement('div');
   meta.className = 'news-card-meta';
+  const dateEl = document.createElement('span');
+  dateEl.className = 'news-card-date';
+  // 開催日と混同しないよう「M/Dのニュース」と表示する（2026-11-04 ユーザー指示）
+  const dp = ev.date.split('-');
+  dateEl.textContent = `${Number(dp[1])}/${Number(dp[2])}のニュース`;
+  meta.appendChild(dateEl);
   if (isNewItem(ev)) meta.appendChild(buildNewBadge());
   if (STORE_KEYWORDS.test(ev.title + (ev.comment || ''))) {
     const tag = document.createElement('span');
