@@ -342,11 +342,13 @@ function renderLatest() {
   const evs = allEvents.filter(ev => {
     if (ev.is_news) return false;
     const end = ev.end_date || ev.date;
-    return end >= today;
+    return end >= today && (!latestTodayOnly || ev.date <= today);
   });
 
   if (evs.length === 0) {
-    container.innerHTML = '<p class="empty-msg">直近のイベントはありません。</p>';
+    container.innerHTML = latestTodayOnly
+      ? '<p class="empty-msg">今日のイベントはありません。</p>'
+      : '<p class="empty-msg">直近のイベントはありません。</p>';
     return;
   }
   evs.forEach((ev, i) => container.appendChild(buildLatestCard(ev, i)));
