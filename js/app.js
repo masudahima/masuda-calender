@@ -41,6 +41,7 @@ async function init() {
   setupModalListeners();
   setupLatestCardFocus();
   setupTodayFilter();
+  setupLatestAutoScroll();
   setupAuth();      // admin.js で定義
   await loadEvents();
 
@@ -329,7 +330,13 @@ function renderCalendar(year, month) {
 function renderLatest() {
   const container = document.getElementById('latest-scroll');
   if (!container) return;
+  stopLatestAuto();
   container.innerHTML = '';
+  container.dataset.loop = '0';
+  container.scrollLeft = 0;
+
+  const dots = document.getElementById('latest-dots');
+  if (dots) dots.innerHTML = '';
 
   const today = todayStr();
   const evs = allEvents.filter(ev => {
@@ -342,15 +349,64 @@ function renderLatest() {
     container.innerHTML = '<p class="empty-msg">直近のイベントはありません。</p>';
     return;
   }
-  evs.forEach(ev => container.appendChild(buildLatestCard(ev)));
+  evs.forEach((ev, i) => container.appendChild(buildLatestCard(ev, i)));
+  if (dots) {
+    evs.forEach((ev, i) => {
+      const d = document.createElement('span');
+      d.className = 'latest-dot' + (i === 0 ? ' active' : '');
+      dots.appendChild(d);
+    });
+  }
   scheduleLatestCardFocus();
+
+  // はみ出すときだけ同じ並びをもう1セット足して、ゆっくり流れるループにする
+  if (latestAutoWanted() && evs.length >= 2) {
+    requestAnimationFrame(() => {
+      if (!container.isConnected || container.dataset.loop === '1') return;
+      if (container.scrollWidth > container.clientWidth + 8) {
+        evs.forEach((ev, i) => {
+          const c = buildLatestCard(ev, i);
+          c.classList.add('is-clone');
+          c.setAttribute('aria-hidden', 'true');
+          c.setAttribute('tabindex', '-1');
+          container.appendChild(c);
+        });
+        container.dataset.loop = '1';
+        scheduleLatestCardFocus();
+        startLatestAuto();
+      }
+    });
+  }
 }
 
-function buildLatestCard(ev) {
+function buildInfoRow(label, value) {
+  const row = document.createElement('div');
+  row.className = 'latest-info-row';
+  const pill = document.createElement('span');
+  pill.className = 'latest-pill';
+  pill.textContent = label;
+  const val = document.createElement('span');
+  val.className = 'latest-info-value';
+  val.textContent = value;
+  row.appendChild(pill);
+  row.appendChild(val);
+  return row;
+}
+
+function buildLatestCard(ev, idx) {
   const card = document.createElement('div');
   card.className = 'latest-card';
+  card.dataset.idx = String(idx || 0);
   card.setAttribute('role', 'button');
   card.setAttribute('tabindex', '0');
+
+  // もこもこシール（エリア）
+  if (ev.area) {
+    const seal = document.createElement('div');
+    seal.className = 'latest-card-seal';
+    seal.textContent = ev.area;
+    card.appendChild(seal);
+  }
 
   const imgs = getImages(ev);
   const imgWrap = document.createElement('div');
@@ -369,26 +425,17 @@ function buildLatestCard(ev) {
   const body = document.createElement('div');
   body.className = 'latest-card-body';
 
-  if (ev.area) {
-    const area = document.createElement('span');
-    area.className = 'latest-card-area';
-    area.dataset.area = ev.area;
-    area.textContent = ev.area;
-    body.appendChild(area);
-  }
-  if (isNewItem(ev)) body.appendChild(buildNewBadge());
-
   const title = document.createElement('div');
   title.className = 'latest-card-title';
   title.textContent = ev.title;
+  if (isNewItem(ev)) title.appendChild(buildNewBadge());
   body.appendChild(title);
 
-  const date = document.createElement('div');
-  date.className = 'latest-card-date';
-  date.textContent = ev.end_date && ev.end_date !== ev.date
+  const dateText = ev.end_date && ev.end_date !== ev.date
     ? `${formatDateJa(ev.date)}〜${formatDateJa(ev.end_date)}`
     : formatDateJa(ev.date);
-  body.appendChild(date);
+  body.appendChild(buildInfoRow('日付', dateText));
+  if (ev.place) body.appendChild(buildInfoRow('場所', ev.place));
 
   card.appendChild(body);
   card.addEventListener('click', () => openDetailModal(ev.id));
@@ -426,6 +473,67 @@ function updateLatestCardFocus() {
   });
 
   cards.forEach(card => card.classList.toggle('is-front', card === front));
+
+  const dotsEl = document.getElementById('latest-dots');
+  if (dotsEl && front) {
+    const idx = Number(front.dataset.idx || 0);
+    Array.prototype.forEach.call(dotsEl.children, (d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+  }
+}
+
+// ===================================================================
+//  スライドレーン: ゆっくり自動で流れる（触ると止まる）
+// ===================================================================
+const LATEST_AUTO_SPEED = 27; // px/秒
+const latestAuto = { raf: null, last: 0, resumeAt: 0, bound: false };
+
+function latestAutoWanted() {
+  return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function startLatestAuto() {
+  const container = document.getElementById('latest-scroll');
+  if (!container || container.dataset.loop !== '1') return;
+  if (latestAuto.raf !== null) return;
+  latestAuto.last = performance.now();
+  const step = (now) => {
+    latestAuto.raf = requestAnimationFrame(step);
+    const dt = Math.min(now - latestAuto.last, 100);
+    latestAuto.last = now;
+    if (document.hidden) return;
+    if (now < latestAuto.resumeAt) return;
+    const half = container.scrollWidth / 2;
+    if (half <= 0) return;
+    container.scrollLeft += (LATEST_AUTO_SPEED * dt) / 1000;
+    if (container.scrollLeft >= half) container.scrollLeft -= half;
+  };
+  latestAuto.raf = requestAnimationFrame(step);
+}
+
+function stopLatestAuto() {
+  if (latestAuto.raf !== null) {
+    cancelAnimationFrame(latestAuto.raf);
+    latestAuto.raf = null;
+  }
+}
+
+function setupLatestAutoScroll() {
+  const container = document.getElementById('latest-scroll');
+  if (!container || latestAuto.bound) return;
+  latestAuto.bound = true;
+  const hold = () => { latestAuto.resumeAt = Infinity; };
+  const release = () => { latestAuto.resumeAt = performance.now() + 2600; };
+  container.addEventListener('pointerdown', hold);
+  container.addEventListener('touchstart', hold, { passive: true });
+  container.addEventListener('mouseenter', hold);
+  container.addEventListener('focusin', hold);
+  window.addEventListener('pointerup', release);
+  container.addEventListener('touchend', release, { passive: true });
+  container.addEventListener('mouseleave', release);
+  container.addEventListener('focusout', release);
+  container.addEventListener('wheel', release, { passive: true });
 }
 
 function scheduleLatestCardFocus() {
