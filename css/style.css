@@ -1884,3 +1884,105 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .news-pager-label { color: #1e4257; font-weight: 700; }
 
 .news-card-seal-text { position: relative; z-index: 1; }
+
+/* ===== トップ帯リデザイン: 紫グラデ＋ポヨヨンロゴ＋黄色キラキラ（2026-11-14） ===== */
+.hero-band {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 24px 16px 34px;
+  background: linear-gradient(180deg, #cc99fe 0%, #debeff 48%, #f0e8ff 80%, #ffffff 100%);
+}
+.hero-logo-wrap { position: relative; width: 78%; max-width: 520px; margin: 0 auto; }
+.hero-logo-wrap::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 58%;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(30, 66, 87, 0.20);
+  filter: blur(4px);
+  transform: translateX(-50%);
+  animation: hero-shadow 3s ease-in-out infinite;
+}
+.hero-logo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 100%;
+  animation: hero-poyoyon 3s ease-in-out infinite;
+}
+@keyframes hero-poyoyon {
+  0%, 57%, 100% { transform: translateY(0) scale(1, 1); }
+  13% { transform: translateY(1px) scale(1.01, 0.97); }
+  20% { transform: translateY(2px) scale(1.05, 0.90); }
+  30% { transform: translateY(-5px) scale(0.96, 1.06); }
+  40% { transform: translateY(0) scale(1.02, 0.95); }
+  47% { transform: translateY(-2px) scale(0.99, 1.02); }
+}
+@keyframes hero-shadow {
+  0%, 57%, 100% { transform: translateX(-50%) scaleX(1); opacity: 1; }
+  20% { transform: translateX(-50%) scaleX(1.07); }
+  30% { transform: translateX(-50%) scaleX(0.93); opacity: 0.55; }
+  40% { transform: translateX(-50%) scaleX(1.02); }
+  47% { transform: translateX(-50%) scaleX(0.99); opacity: 0.85; }
+}
+.hero-sub {
+  margin: 14px 0 0;
+  font-family: 'Zen Maru Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e4257;
+  letter-spacing: 0.02em;
+}
+.hero-sparkle {
+  position: absolute;
+  background: #ffc740;
+  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
+  animation: hero-twinkle 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hero-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.82); }
+}
+.hero-sparkle.sp1 { left: 9%; top: 20%; width: 16px; height: 16px; animation-duration: 3s; animation-delay: 0s; }
+.hero-sparkle.sp2 { right: 9%; top: 20%; width: 16px; height: 16px; animation-duration: 3.4s; animation-delay: 0.7s; }
+.hero-sparkle.sp3 { left: 15%; top: 54%; width: 12px; height: 12px; animation-duration: 2.8s; animation-delay: 1.3s; background: #ffd864; }
+.hero-sparkle.sp4 { right: 15%; top: 54%; width: 12px; height: 12px; animation-duration: 3.2s; animation-delay: 0.4s; background: #ffd864; }
+.hero-sparkle.sp5 { left: 4%; top: 38%; width: 10px; height: 10px; animation-duration: 2.6s; animation-delay: 1.9s; background: #ffe08a; }
+.hero-sparkle.sp6 { right: 4%; top: 38%; width: 10px; height: 10px; animation-duration: 3.6s; animation-delay: 1s; background: #ffe08a; }
+.hero-sparkle.sp7 { left: 23%; top: 9%; width: 10px; height: 10px; animation-duration: 3.1s; animation-delay: 0.2s; background: #ffd864; }
+.hero-sparkle.sp8 { right: 23%; top: 9%; width: 10px; height: 10px; animation-duration: 2.9s; animation-delay: 1.6s; background: #ffd864; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo, .hero-logo-wrap::after, .hero-sparkle { animation: none; }
+}
+
+/* ヘッダータイトルも丸文字＋紺に */
+.site-title {
+  font-family: 'Zen Maru Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-weight: 900;
+  color: #1e4257;
+}
+
+/* カレンダーをカード型に（紺枠＋ミント影＋曜日ヘッダー） */
+.calendar-section { font-family: 'Zen Maru Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif; }
+.calendar-nav h2 { font-weight: 900; color: #1e4257; font-size: 19px; }
+.calendar-nav .nav-btn {
+  width: 42px;
+  height: 42px;
+  border: 2px solid #1e4257;
+  color: #1e4257;
+  background: #ffffff;
+}
+.calendar-wrapper {
+  border: 2px solid #1e4257;
+  border-radius: 20px;
+  box-shadow: 7px 7px 0 #b7e0c6;
+  background: #ffffff;
+}
+.calendar-weekdays { background: #c6ebd4; border-bottom: 2px solid #1e4257; }
