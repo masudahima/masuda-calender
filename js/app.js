@@ -550,16 +550,27 @@ function setupLatestAutoScroll() {
   if (!container || latestAuto.bound) return;
   latestAuto.bound = true;
   const hold = () => { latestAuto.resumeAt = Infinity; };
-  const release = () => { latestAuto.resumeAt = performance.now() + 2600; };
+  const resumeNow = () => { latestAuto.resumeAt = 0; };
+  const resumeSoon = () => { latestAuto.resumeAt = performance.now() + 400; };
   container.addEventListener('pointerdown', hold);
   container.addEventListener('touchstart', hold, { passive: true });
-  container.addEventListener('mouseenter', hold);
   container.addEventListener('focusin', hold);
-  window.addEventListener('pointerup', release);
-  container.addEventListener('touchend', release, { passive: true });
-  container.addEventListener('mouseleave', release);
-  container.addEventListener('focusout', release);
-  container.addEventListener('wheel', release, { passive: true });
+  // マウス操作のときだけ、入ったら止める／出たら再開する
+  // （タッチではモーダル表示時などに mouseleave が誤発火して勝手に動き出すため）
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    container.addEventListener('mouseenter', hold);
+    container.addEventListener('mouseleave', resumeSoon);
+  }
+  container.addEventListener('focusout', (e) => {
+    if (!container.contains(e.relatedTarget)) resumeSoon();
+  });
+  // レーンの外（背景などの何もない所）を触ったら、止まった位置から再開する
+  document.addEventListener('pointerdown', (e) => {
+    if (!container.contains(e.target)) resumeNow();
+  });
+  document.addEventListener('wheel', (e) => {
+    if (!container.contains(e.target)) resumeNow();
+  }, { passive: true });
 }
 
 function scheduleLatestCardFocus() {
