@@ -502,7 +502,7 @@ function updateLatestCardFocus() {
 // ===================================================================
 //  スライドレーン: ゆっくり自動で流れる（触ると止まる）
 // ===================================================================
-const LATEST_AUTO_SPEED = 27; // px/秒
+const LATEST_AUTO_SPEED = 40; // px/秒（参考サイトのSplide AutoScroll 0.5px/frame≒30px/sより少し速め）
 const latestAuto = { raf: null, last: 0, resumeAt: 0, bound: false, pos: null };
 
 function latestAutoWanted() {
