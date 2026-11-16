@@ -932,6 +932,13 @@ function openDayModal(dateStr) {
     if (ev.is_news) return false;
     return occursOnDate(ev, dateStr);
   });
+  // その日だけのイベントを上に、期間の長いものほど下に並べる（2026-11-16 ユーザー希望）
+  const spanDays = ev => {
+    const s = new Date(ev.date + 'T00:00:00').getTime();
+    const e = new Date((ev.end_date || ev.date) + 'T00:00:00').getTime();
+    return Math.round((e - s) / 86400000);
+  };
+  evs.sort((a, b) => spanDays(a) - spanDays(b));
   const listEl = document.getElementById('day-modal-events');
   listEl.innerHTML = '';
 
