@@ -2082,6 +2082,47 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .calendar-section { padding-top: 4px; }
 .calendar-nav { padding-top: 4px; margin-bottom: 4px; }
 .calendar-hint { margin-bottom: 8px; }
+/* 日別モーダルのタイトルを可愛く（ユーザー指摘 2026-11-18） */
+#day-modal-title {
+  position: relative;
+  display: inline-block;
+  font-family: 'Zen Maru Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-weight: 900;
+  font-size: 17px;
+  color: #1e4257;
+  background: #fffaf0;
+  border: 2px solid #1e4257;
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 #b7e0c6;
+  padding: 6px 28px;
+}
+#day-modal-title::before,
+#day-modal-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translateY(-50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0 L15 9 L24 12 L15 15 L12 24 L9 15 L0 12 L9 9 Z' fill='%23ffcf3f'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+#day-modal-title::before { left: 10px; }
+#day-modal-title::after { right: 10px; }
+.day-holiday-pill {
+  display: inline-block;
+  margin-left: 8px;
+  background: #ffe9e7;
+  color: #c2432f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.6;
+  padding: 1px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+}
 .calendar-cell.holiday .day-number { color: var(--color-sun); }
 .calendar-cell.today.holiday .day-number { color: #fff; }
 .day-count-wrap { display: flex; justify-content: center; margin-top: 5px; padding: 0 2px; }
@@ -3643,7 +3684,17 @@ function buildNewsCard(ev) {
 //  日付モーダル
 // ===================================================================
 function openDayModal(dateStr) {
-  document.getElementById('day-modal-title').textContent = `${dateStr} のイベント`;
+  const _dp = dateStr.split('-').map(Number);
+  const _dow = new Date(_dp[0], _dp[1] - 1, _dp[2]).getDay();
+  const _titleEl = document.getElementById('day-modal-title');
+  _titleEl.textContent = _dp[1] + '月' + _dp[2] + '日（' + '日月火水木金土'[_dow] + '）のイベント';
+  const _hol = jpHolidayName(dateStr);
+  if (_hol) {
+    const _s = document.createElement('span');
+    _s.className = 'day-holiday-pill';
+    _s.textContent = _hol;
+    _titleEl.appendChild(_s);
+  }
 
   const evs   = allEvents.filter(ev => {
     if (ev.is_news) return false;
