@@ -2082,6 +2082,8 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .calendar-section { padding-top: 4px; }
 .calendar-nav { padding-top: 4px; margin-bottom: 4px; }
 .calendar-hint { margin-bottom: 8px; }
+.calendar-cell.holiday .day-number { color: var(--color-sun); }
+.calendar-cell.today.holiday .day-number { color: #fff; }
 .day-count-wrap { display: flex; justify-content: center; margin-top: 5px; padding: 0 2px; }
 .day-count-pill {
   display: inline-block;
@@ -2793,6 +2795,54 @@ function setupCalendarNav() {
   });
 }
 
+// ===== プレビュー追加: 日本の祝日（色付け用） =====
+function jpHolidays(year) {
+  const map = {};
+  const add = (m, d, name) => { map[year + '-' + pad2(m) + '-' + pad2(d)] = name; };
+  const nthMonday = (m, n) => { const f = new Date(year, m - 1, 1).getDay(); return 1 + ((8 - f) % 7) + (n - 1) * 7; };
+  add(1, 1, '元日');
+  add(1, nthMonday(1, 2), '成人の日');
+  add(2, 11, '建国記念の日');
+  add(2, 23, '天皇誕生日');
+  add(3, Math.floor(20.8431 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4), '春分の日');
+  add(4, 29, '昭和の日');
+  add(5, 3, '憲法記念日');
+  add(5, 4, 'みどりの日');
+  add(5, 5, 'こどもの日');
+  add(7, nthMonday(7, 3), '海の日');
+  add(8, 11, '山の日');
+  add(9, nthMonday(9, 3), '敬老の日');
+  add(9, Math.floor(23.2488 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4), '秋分の日');
+  add(10, nthMonday(10, 2), 'スポーツの日');
+  add(11, 3, '文化の日');
+  add(11, 23, '勤労感謝の日');
+  for (const ds of Object.keys(map)) {
+    const p = ds.split('-').map(Number);
+    if (new Date(p[0], p[1] - 1, p[2]).getDay() === 0) {
+      const t = new Date(p[0], p[1] - 1, p[2]);
+      do { t.setDate(t.getDate() + 1); } while (map[t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate())]);
+      map[t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate())] = '振替休日';
+    }
+  }
+  for (let m = 1; m <= 12; m++) {
+    const last = new Date(year, m, 0).getDate();
+    for (let d = 2; d < last; d++) {
+      const ds = year + '-' + pad2(m) + '-' + pad2(d);
+      if (map[ds]) continue;
+      const dow = new Date(year, m - 1, d).getDay();
+      if (dow === 0 || dow === 6) continue;
+      if (map[year + '-' + pad2(m) + '-' + pad2(d - 1)] && map[year + '-' + pad2(m) + '-' + pad2(d + 1)]) map[ds] = '国民の休日';
+    }
+  }
+  return map;
+}
+const _holidayCache = {};
+function jpHolidayName(dateStr) {
+  const y = Number(dateStr.slice(0, 4));
+  if (!_holidayCache[y]) _holidayCache[y] = jpHolidays(y);
+  return _holidayCache[y][dateStr] || null;
+}
+
 function renderCalendar(year, month) {
   document.getElementById('calendar-title').textContent = `${year}年${month + 1}月`;
 
@@ -2837,6 +2887,7 @@ function renderCalendar(year, month) {
     if (dateStr === today) cell.classList.add('today');
     if (dow === 0) cell.classList.add('sun');
     if (dow === 6) cell.classList.add('sat');
+    if (jpHolidayName(dateStr)) cell.classList.add('holiday');
     cell.dataset.date = dateStr;
 
     const num = document.createElement('span');
