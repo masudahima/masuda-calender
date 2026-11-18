@@ -2160,9 +2160,9 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   padding: 8px 12px;
   letter-spacing: 0.02em;
 }
-.gallery-grid { columns: 2; column-gap: 14px; }
-@media (min-width: 720px) { .gallery-grid { columns: 3; } }
-.gallery-card { break-inside: avoid; margin-bottom: 18px; cursor: pointer; }
+.gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; align-items: start; }
+@media (min-width: 720px) { .gallery-grid { grid-template-columns: repeat(3, 1fr); } }
+.gallery-card { cursor: pointer; }
 .gallery-img { display: block; width: 100%; height: auto; border-radius: 10px; }
 .gallery-noimg { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: var(--color-primary-subtle); color: var(--color-text-muted); font-size: 12px; border-radius: 10px; }
 .gallery-area { display: inline-block; margin-top: 8px; background: #1e4257; color: #fff; font-size: 11px; font-weight: 700; line-height: 1.6; padding: 1px 9px; border-radius: 999px; }
