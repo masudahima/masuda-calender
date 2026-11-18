@@ -119,7 +119,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
-        <p class="calendar-hint">印がある日付をタップすると<br>その日のイベント情報が見られます</p>
+        <p class="calendar-hint">日付をタップすると<br>その日のイベントが見られます</p>
         <div class="calendar-wrapper">
           <div class="calendar-weekdays" aria-hidden="true">
             <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
@@ -134,9 +134,10 @@
           <span class="latest-en">UPCOMING</span>
           <div class="latest-heading-row">
             <span class="latest-ja">近日のイベント</span>
-            <button id="today-filter-btn" class="today-filter-btn" type="button" aria-pressed="false">今日のイベントにしぼる</button>
+            <button id="cond-filter-btn" class="today-filter-btn" type="button" aria-expanded="false">条件をしぼる</button>
           </div>
         </div>
+        <div id="cond-panel" class="cond-panel" hidden></div>
         <div id="latest-scroll" class="latest-scroll"></div>
         <div id="latest-dots" class="latest-dots" aria-hidden="true"></div>
         <p class="latest-lane-note">触ると止まります。ほかの場所を触ると、また動き出します</p>
@@ -241,11 +242,15 @@
   <div id="day-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="day-modal-title">
     <div class="modal-overlay" id="day-modal-overlay"></div>
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header day-modal-header">
+        <div class="day-modal-header-row">
         <h2 id="day-modal-title" class="modal-title"></h2>
         <button class="modal-close" id="day-modal-close" aria-label="閉じる">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
+        </div>
+        <div class="day-filter-bar"><button id="day-cond-btn" class="today-filter-btn" type="button" aria-expanded="false">条件をしぼる</button></div>
+        <div id="day-cond-panel" class="cond-panel" hidden></div>
       </div>
       <div class="modal-body">
         <div id="day-modal-events" class="day-event-list"></div>

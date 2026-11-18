@@ -1986,3 +1986,134 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   background: #ffffff;
 }
 .calendar-weekdays { background: #c6ebd4; border-bottom: 2px solid #1e4257; }
+
+
+/* ===== プレビュー追加分: 条件をしぼる ===== */
+.cond-panel {
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+}
+.cond-panel[hidden] { display: none; }
+.cond-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+.cond-opt.selected { background: var(--color-primary-subtle); }
+.cond-opt .cond-count { font-size: 12px; font-weight: 700; color: var(--color-text-muted); }
+.day-modal-header { flex-direction: column; align-items: stretch; gap: 10px; }
+.day-modal-header-row { display: flex; align-items: center; justify-content: space-between; }
+.day-filter-bar { display: flex; }
+.day-filter-bar .today-filter-btn { margin-left: 0; }
+#day-cond-panel { margin: 0; }
+/* 月タイトル周りを可愛く（ユーザー指摘 2026-11-18）: クリームのピル＋両端キラキラ＋ミント影 */
+.calendar-nav h2 {
+  position: relative;
+  background: #fffaf0;
+  border: 2px solid #1e4257;
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 #b7e0c6;
+  padding: 7px 30px;
+}
+.calendar-nav h2::before,
+.calendar-nav h2::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  transform: translateY(-50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0 L15 9 L24 12 L15 15 L12 24 L9 15 L0 12 L9 9 Z' fill='%23ffcf3f'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.calendar-nav h2::before { left: 11px; }
+.calendar-nav h2::after { right: 11px; }
+.calendar-nav .nav-btn { box-shadow: 2px 2px 0 #b7e0c6; }
+/* カレンダー上の余白を詰める（ユーザー指摘 2026-11-18） */
+.hero-band { padding-bottom: 20px; }
+.calendar-section { padding-top: 4px; }
+.calendar-nav { padding-top: 4px; margin-bottom: 4px; }
+.calendar-hint { margin-bottom: 8px; }
+/* 日別モーダルのタイトルを可愛く（ユーザー指摘 2026-11-18） */
+#day-modal-title {
+  position: relative;
+  display: inline-block;
+  font-family: 'Zen Maru Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-weight: 900;
+  font-size: 17px;
+  color: #1e4257;
+  background: #fffaf0;
+  border: 2px solid #1e4257;
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 #b7e0c6;
+  padding: 6px 28px;
+}
+#day-modal-title::before,
+#day-modal-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translateY(-50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0 L15 9 L24 12 L15 15 L12 24 L9 15 L0 12 L9 9 Z' fill='%23ffcf3f'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+#day-modal-title::before { left: 10px; }
+#day-modal-title::after { right: 10px; }
+.day-holiday-pill {
+  display: inline-block;
+  margin-left: 8px;
+  background: #ffe9e7;
+  color: #c2432f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.6;
+  padding: 1px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+}
+/* 数字を大きく、単位（年・月・日・件）を小さく（ユーザー指摘 2026-11-18） */
+.calendar-nav h2 .num { font-size: 1.22em; }
+.calendar-nav h2 .unit { font-size: 0.7em; }
+.day-count-pill .num { font-size: 13px; }
+.day-count-pill .unit { font-size: 9.5px; }
+#day-modal-title .num { font-size: 1.2em; }
+#day-modal-title .unit { font-size: 0.7em; }
+.cond-opt .cond-count .num { font-size: 14px; }
+.cond-opt .cond-count .unit { font-size: 10px; }
+.calendar-cell.holiday .day-number { color: var(--color-sun); }
+.calendar-cell.today.holiday .day-number { color: #fff; }
+.day-count-wrap { display: flex; justify-content: center; margin-top: 5px; padding: 0 2px; }
+.day-count-pill {
+  display: inline-block;
+  background: #a9e6c6;
+  color: #1b4332;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  padding: 0 6px;
+  border-radius: 999px;
+}

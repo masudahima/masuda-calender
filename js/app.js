@@ -6,7 +6,7 @@
 // --- 共有状態（admin.js と共有）---
 let supabaseClient;
 let allEvents   = [];
-let latestTodayOnly = false;
+let laneCond = 'all'; // プレビュー追加: 'all' | 'today' | 町名
 let calendarYear, calendarMonth;
 
 // --- 定数 ---
@@ -40,7 +40,7 @@ async function init() {
   setupCalendarNav();
   setupModalListeners();
   setupLatestCardFocus();
-  setupTodayFilter();
+  setupCondFilter();
   setupLatestAutoScroll();
   setupAuth();      // admin.js で定義
   await loadEvents();
@@ -247,8 +247,56 @@ function setupCalendarNav() {
   });
 }
 
+// ===== プレビュー追加: 日本の祝日（色付け用） =====
+function jpHolidays(year) {
+  const map = {};
+  const add = (m, d, name) => { map[year + '-' + pad2(m) + '-' + pad2(d)] = name; };
+  const nthMonday = (m, n) => { const f = new Date(year, m - 1, 1).getDay(); return 1 + ((8 - f) % 7) + (n - 1) * 7; };
+  add(1, 1, '元日');
+  add(1, nthMonday(1, 2), '成人の日');
+  add(2, 11, '建国記念の日');
+  add(2, 23, '天皇誕生日');
+  add(3, Math.floor(20.8431 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4), '春分の日');
+  add(4, 29, '昭和の日');
+  add(5, 3, '憲法記念日');
+  add(5, 4, 'みどりの日');
+  add(5, 5, 'こどもの日');
+  add(7, nthMonday(7, 3), '海の日');
+  add(8, 11, '山の日');
+  add(9, nthMonday(9, 3), '敬老の日');
+  add(9, Math.floor(23.2488 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4), '秋分の日');
+  add(10, nthMonday(10, 2), 'スポーツの日');
+  add(11, 3, '文化の日');
+  add(11, 23, '勤労感謝の日');
+  for (const ds of Object.keys(map)) {
+    const p = ds.split('-').map(Number);
+    if (new Date(p[0], p[1] - 1, p[2]).getDay() === 0) {
+      const t = new Date(p[0], p[1] - 1, p[2]);
+      do { t.setDate(t.getDate() + 1); } while (map[t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate())]);
+      map[t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate())] = '振替休日';
+    }
+  }
+  for (let m = 1; m <= 12; m++) {
+    const last = new Date(year, m, 0).getDate();
+    for (let d = 2; d < last; d++) {
+      const ds = year + '-' + pad2(m) + '-' + pad2(d);
+      if (map[ds]) continue;
+      const dow = new Date(year, m - 1, d).getDay();
+      if (dow === 0 || dow === 6) continue;
+      if (map[year + '-' + pad2(m) + '-' + pad2(d - 1)] && map[year + '-' + pad2(m) + '-' + pad2(d + 1)]) map[ds] = '国民の休日';
+    }
+  }
+  return map;
+}
+const _holidayCache = {};
+function jpHolidayName(dateStr) {
+  const y = Number(dateStr.slice(0, 4));
+  if (!_holidayCache[y]) _holidayCache[y] = jpHolidays(y);
+  return _holidayCache[y][dateStr] || null;
+}
+
 function renderCalendar(year, month) {
-  document.getElementById('calendar-title').textContent = `${year}年${month + 1}月`;
+  document.getElementById('calendar-title').innerHTML = '<span class="num">' + year + '</span><span class="unit">年</span><span class="num">' + (month + 1) + '</span><span class="unit">月</span>';
 
   const grid = document.getElementById('calendar-grid');
   grid.innerHTML = '';
@@ -291,6 +339,7 @@ function renderCalendar(year, month) {
     if (dateStr === today) cell.classList.add('today');
     if (dow === 0) cell.classList.add('sun');
     if (dow === 6) cell.classList.add('sat');
+    if (jpHolidayName(dateStr)) cell.classList.add('holiday');
     cell.dataset.date = dateStr;
 
     const num = document.createElement('span');
@@ -299,21 +348,13 @@ function renderCalendar(year, month) {
     cell.appendChild(num);
 
     if (evs.length > 0) {
-      const dotsWrap = document.createElement('div');
-      dotsWrap.className = 'day-dots';
-      const showDots = Math.min(evs.length, 3);
-      for (let i = 0; i < showDots; i++) {
-        const dot = document.createElement('span');
-        dot.className = 'day-dot';
-        dotsWrap.appendChild(dot);
-      }
-      if (evs.length > 3) {
-        const plus = document.createElement('span');
-        plus.className = 'day-dot-plus';
-        plus.textContent = '+';
-        dotsWrap.appendChild(plus);
-      }
-      cell.appendChild(dotsWrap);
+      const pillWrap = document.createElement('div');
+      pillWrap.className = 'day-count-wrap';
+      const pill = document.createElement('span');
+      pill.className = 'day-count-pill';
+      pill.innerHTML = '<span class="num">' + evs.length + '</span><span class="unit">件</span>';
+      pillWrap.appendChild(pill);
+      cell.appendChild(pillWrap);
     }
 
     if (evs.length > 0) {
@@ -342,13 +383,15 @@ function renderLatest() {
   const evs = allEvents.filter(ev => {
     if (ev.is_news) return false;
     const end = ev.end_date || ev.date;
-    return end >= today && (!latestTodayOnly || ev.date <= today);
+    return end >= today && lanePass(ev, today);
   });
 
   if (evs.length === 0) {
-    container.innerHTML = latestTodayOnly
+    container.innerHTML = laneCond === 'today'
       ? '<p class="empty-msg">今日のイベントはありません。</p>'
-      : '<p class="empty-msg">直近のイベントはありません。</p>';
+      : laneCond === 'all'
+        ? '<p class="empty-msg">直近のイベントはありません。</p>'
+        : '<p class="empty-msg">' + laneCond + 'のイベントはありません。</p>';
     return;
   }
   evs.forEach((ev, i) => container.appendChild(buildLatestCard(ev, i)));
@@ -581,19 +624,143 @@ function scheduleLatestCardFocus() {
   });
 }
 
-function setupTodayFilter() {
-  const btn = document.getElementById('today-filter-btn');
-  if (!btn || btn.dataset.ready) return;
+// ===== プレビュー追加: 条件をしぼる（本日のイベント / 場所） =====
+const COND_TOWNS = ['益田', '津和野', '浜田', '吉賀', '萩', '江津', 'その他'];
+
+function townOf(ev) {
+  const a = ev.area || '';
+  if (a === '市街地' || a === '美都' || a === '匹見') return '益田';
+  if (a === '浜田市') return '浜田';
+  if (a === '津和野') return '津和野';
+  if (a === '吉賀') return '吉賀';
+  const s = (ev.place || '') + (ev.title || '');
+  if (s.includes('萩')) return '萩';
+  if (s.includes('江津')) return '江津';
+  return 'その他';
+}
+
+function lanePass(ev, today) {
+  if (laneCond === 'all') return true;
+  if (laneCond === 'today') return ev.date <= today;
+  return townOf(ev) === laneCond;
+}
+
+function condOptionRow(label, count, selected, onPick) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'cond-opt' + (selected ? ' selected' : '');
+  const l = document.createElement('span');
+  l.textContent = label;
+  const c = document.createElement('span');
+  c.className = 'cond-count';
+  c.innerHTML = '<span class="num">' + count + '</span><span class="unit">件</span>';
+  b.appendChild(l);
+  b.appendChild(c);
+  b.addEventListener('click', onPick);
+  return b;
+}
+
+function setupCondFilter() {
+  const btn = document.getElementById('cond-filter-btn');
+  const panel = document.getElementById('cond-panel');
+  if (!btn || !panel || btn.dataset.ready) return;
   btn.dataset.ready = '1';
   btn.addEventListener('click', () => {
-    latestTodayOnly = !latestTodayOnly;
-    btn.classList.toggle('active', latestTodayOnly);
-    btn.setAttribute('aria-pressed', String(latestTodayOnly));
-    btn.textContent = latestTodayOnly ? 'すべて表示' : '今日のイベントにしぼる';
-    renderLatest();
-    const scroller = document.getElementById('latest-scroll');
-    if (scroller) scroller.scrollTo({ left: 0, behavior: 'smooth' });
+    const open = panel.hidden;
+    if (open) buildLaneCondPanel();
+    panel.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
   });
+}
+
+function buildLaneCondPanel() {
+  const panel = document.getElementById('cond-panel');
+  const btn = document.getElementById('cond-filter-btn');
+  if (!panel || !btn) return;
+  panel.innerHTML = '';
+  const today = todayStr();
+  const upcoming = allEvents.filter(ev => !ev.is_news && (ev.end_date || ev.date) >= today);
+  const counts = { all: upcoming.length, today: upcoming.filter(ev => ev.date <= today).length };
+  COND_TOWNS.forEach(t => { counts[t] = upcoming.filter(ev => townOf(ev) === t).length; });
+  const opts = [{ k: 'all', label: 'すべて' }, { k: 'today', label: '本日のイベント' }]
+    .concat(COND_TOWNS.map(t => ({ k: t, label: t })));
+  opts.forEach(o => {
+    panel.appendChild(condOptionRow(o.label, counts[o.k], laneCond === o.k, () => {
+      laneCond = o.k;
+      btn.textContent = o.k === 'all' ? '条件をしぼる' : '条件をしぼる：' + o.label;
+      btn.classList.toggle('active', o.k !== 'all');
+      panel.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      renderLatest();
+      renderEventList();
+      const scroller = document.getElementById('latest-scroll');
+      if (scroller) scroller.scrollTo({ left: 0, behavior: 'smooth' });
+    }));
+  });
+}
+
+// 日付モーダル用
+let dayModalEvs = [];
+let dayTown = 'all';
+
+function setupDayFilterUI() {
+  const btn = document.getElementById('day-cond-btn');
+  const panel = document.getElementById('day-cond-panel');
+  if (!btn || !panel) return;
+  btn.textContent = '条件をしぼる';
+  btn.classList.remove('active');
+  btn.setAttribute('aria-expanded', 'false');
+  panel.hidden = true;
+  if (!btn.dataset.ready) {
+    btn.dataset.ready = '1';
+    btn.addEventListener('click', () => {
+      const open = panel.hidden;
+      if (open) buildDayCondPanel();
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  }
+}
+
+function buildDayCondPanel() {
+  const panel = document.getElementById('day-cond-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  panel.appendChild(condOptionRow('すべて', dayModalEvs.length, dayTown === 'all', () => pickDayTown('all')));
+  COND_TOWNS.forEach(t => {
+    const n = dayModalEvs.filter(ev => townOf(ev) === t).length;
+    if (n === 0) return;
+    panel.appendChild(condOptionRow(t, n, dayTown === t, () => pickDayTown(t)));
+  });
+}
+
+function pickDayTown(k) {
+  dayTown = k;
+  const btn = document.getElementById('day-cond-btn');
+  const panel = document.getElementById('day-cond-panel');
+  if (btn) {
+    btn.textContent = k === 'all' ? '条件をしぼる' : '条件をしぼる：' + k;
+    btn.classList.toggle('active', k !== 'all');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  if (panel) panel.hidden = true;
+  renderDayRows();
+}
+
+function renderDayRows() {
+  const listEl = document.getElementById('day-modal-events');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  if (dayModalEvs.length === 0) {
+    listEl.innerHTML = '<p class="empty-msg">この日に登録されたイベントはありません。</p>';
+    return;
+  }
+  const evs = dayTown === 'all' ? dayModalEvs : dayModalEvs.filter(ev => townOf(ev) === dayTown);
+  if (evs.length === 0) {
+    listEl.innerHTML = '<p class="empty-msg">この場所のイベントはありません。</p>';
+    return;
+  }
+  evs.forEach(ev => listEl.appendChild(buildDayEventRow(ev)));
 }
 
 function setupLatestCardFocus() {
@@ -616,13 +783,15 @@ function renderEventList() {
   const evs = allEvents.filter(ev => {
     if (ev.is_news) return false;
     const end = ev.end_date || ev.date;
-    return end >= today && (!latestTodayOnly || ev.date <= today);
+    return end >= today && lanePass(ev, today);
   });
 
   if (evs.length === 0) {
-    container.innerHTML = latestTodayOnly
+    container.innerHTML = laneCond === 'today'
       ? '<p class="empty-msg">今日のイベントはありません。</p>'
-      : '<p class="empty-msg">登録されているイベントはありません。</p>';
+      : laneCond === 'all'
+        ? '<p class="empty-msg">登録されているイベントはありません。</p>'
+        : '<p class="empty-msg">' + laneCond + 'のイベントはありません。</p>';
     return;
   }
 
@@ -926,7 +1095,17 @@ function buildNewsCard(ev) {
 //  日付モーダル
 // ===================================================================
 function openDayModal(dateStr) {
-  document.getElementById('day-modal-title').textContent = `${dateStr} のイベント`;
+  const _dp = dateStr.split('-').map(Number);
+  const _dow = new Date(_dp[0], _dp[1] - 1, _dp[2]).getDay();
+  const _titleEl = document.getElementById('day-modal-title');
+  _titleEl.innerHTML = '<span class="num">' + _dp[1] + '</span><span class="unit">月</span><span class="num">' + _dp[2] + '</span><span class="unit">日</span>（' + '日月火水木金土'[_dow] + '）のイベント';
+  const _hol = jpHolidayName(dateStr);
+  if (_hol) {
+    const _s = document.createElement('span');
+    _s.className = 'day-holiday-pill';
+    _s.textContent = _hol;
+    _titleEl.appendChild(_s);
+  }
 
   const evs   = allEvents.filter(ev => {
     if (ev.is_news) return false;
@@ -939,14 +1118,10 @@ function openDayModal(dateStr) {
     return Math.round((e - s) / 86400000);
   };
   evs.sort((a, b) => spanDays(a) - spanDays(b));
-  const listEl = document.getElementById('day-modal-events');
-  listEl.innerHTML = '';
-
-  if (evs.length === 0) {
-    listEl.innerHTML = '<p class="empty-msg">この日に登録されたイベントはありません。</p>';
-  } else {
-    evs.forEach(ev => listEl.appendChild(buildDayEventRow(ev)));
-  }
+  dayModalEvs = evs;
+  dayTown = 'all';
+  setupDayFilterUI();
+  renderDayRows();
 
   // スクロールヒント
   const hint = document.getElementById('day-scroll-hint');
