@@ -2123,6 +2123,15 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   border-radius: 999px;
   vertical-align: 2px;
 }
+/* 数字を大きく、単位（年・月・日・件）を小さく（ユーザー指摘 2026-11-18） */
+.calendar-nav h2 .num { font-size: 1.22em; }
+.calendar-nav h2 .unit { font-size: 0.7em; }
+.day-count-pill .num { font-size: 13px; }
+.day-count-pill .unit { font-size: 9.5px; }
+#day-modal-title .num { font-size: 1.2em; }
+#day-modal-title .unit { font-size: 0.7em; }
+.cond-opt .cond-count .num { font-size: 14px; }
+.cond-opt .cond-count .unit { font-size: 10px; }
 .calendar-cell.holiday .day-number { color: var(--color-sun); }
 .calendar-cell.today.holiday .day-number { color: #fff; }
 .day-count-wrap { display: flex; justify-content: center; margin-top: 5px; padding: 0 2px; }
@@ -2885,7 +2894,7 @@ function jpHolidayName(dateStr) {
 }
 
 function renderCalendar(year, month) {
-  document.getElementById('calendar-title').textContent = `${year}年${month + 1}月`;
+  document.getElementById('calendar-title').innerHTML = '<span class="num">' + year + '</span><span class="unit">年</span><span class="num">' + (month + 1) + '</span><span class="unit">月</span>';
 
   const grid = document.getElementById('calendar-grid');
   grid.innerHTML = '';
@@ -2941,7 +2950,7 @@ function renderCalendar(year, month) {
       pillWrap.className = 'day-count-wrap';
       const pill = document.createElement('span');
       pill.className = 'day-count-pill';
-      pill.textContent = evs.length + '件';
+      pill.innerHTML = '<span class="num">' + evs.length + '</span><span class="unit">件</span>';
       pillWrap.appendChild(pill);
       cell.appendChild(pillWrap);
     }
@@ -3242,7 +3251,7 @@ function condOptionRow(label, count, selected, onPick) {
   l.textContent = label;
   const c = document.createElement('span');
   c.className = 'cond-count';
-  c.textContent = count + '件';
+  c.innerHTML = '<span class="num">' + count + '</span><span class="unit">件</span>';
   b.appendChild(l);
   b.appendChild(c);
   b.addEventListener('click', onPick);
@@ -3687,7 +3696,7 @@ function openDayModal(dateStr) {
   const _dp = dateStr.split('-').map(Number);
   const _dow = new Date(_dp[0], _dp[1] - 1, _dp[2]).getDay();
   const _titleEl = document.getElementById('day-modal-title');
-  _titleEl.textContent = _dp[1] + '月' + _dp[2] + '日（' + '日月火水木金土'[_dow] + '）のイベント';
+  _titleEl.innerHTML = '<span class="num">' + _dp[1] + '</span><span class="unit">月</span><span class="num">' + _dp[2] + '</span><span class="unit">日</span>（' + '日月火水木金土'[_dow] + '）のイベント';
   const _hol = jpHolidayName(dateStr);
   if (_hol) {
     const _s = document.createElement('span');
