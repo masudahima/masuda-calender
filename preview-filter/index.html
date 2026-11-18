@@ -2052,6 +2052,17 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .day-filter-bar { display: flex; }
 .day-filter-bar .today-filter-btn { margin-left: 0; }
 #day-cond-panel { margin: 0; }
+.day-count-wrap { display: flex; justify-content: center; margin-top: 5px; padding: 0 2px; }
+.day-count-pill {
+  display: inline-block;
+  background: #a9e6c6;
+  color: #1b4332;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 0 7px;
+  border-radius: 999px;
+}
 
 </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -2803,21 +2814,13 @@ function renderCalendar(year, month) {
     cell.appendChild(num);
 
     if (evs.length > 0) {
-      const dotsWrap = document.createElement('div');
-      dotsWrap.className = 'day-dots';
-      const showDots = Math.min(evs.length, 3);
-      for (let i = 0; i < showDots; i++) {
-        const dot = document.createElement('span');
-        dot.className = 'day-dot';
-        dotsWrap.appendChild(dot);
-      }
-      if (evs.length > 3) {
-        const plus = document.createElement('span');
-        plus.className = 'day-dot-plus';
-        plus.textContent = '+';
-        dotsWrap.appendChild(plus);
-      }
-      cell.appendChild(dotsWrap);
+      const pillWrap = document.createElement('div');
+      pillWrap.className = 'day-count-wrap';
+      const pill = document.createElement('span');
+      pill.className = 'day-count-pill';
+      pill.textContent = evs.length + '件';
+      pillWrap.appendChild(pill);
+      cell.appendChild(pillWrap);
     }
 
     if (evs.length > 0) {
