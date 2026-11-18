@@ -2117,3 +2117,14 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   padding: 0 6px;
   border-radius: 999px;
 }
+
+/* 微調整: スマホでカレンダー全体が最初の画面に入るように（2026-11-18） */
+@media (max-width: 479px) {
+  .calendar-cell { min-height: 54px; padding: 3px; }
+  .day-count-wrap { margin-top: 3px; }
+  .day-count-pill { line-height: 1.4; }
+  .hero-band { padding-bottom: 14px; }
+  .calendar-nav h2 { padding-top: 5px; padding-bottom: 5px; }
+  .calendar-nav { margin-bottom: 2px; }
+  .calendar-hint { margin-bottom: 6px; }
+}
