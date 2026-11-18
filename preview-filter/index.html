@@ -2009,15 +2009,6 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 
 
 /* ===== プレビュー追加分: 条件をしぼる ===== */
-.preview-banner {
-  background: #1a1a2e;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-  padding: 8px 12px;
-  letter-spacing: 0.02em;
-}
 .cond-panel {
   background: #fff;
   border: 1.5px solid var(--color-border);
@@ -2147,6 +2138,39 @@ button:active, .map-day-row:active { transform: scale(0.95); }
   border-radius: 999px;
 }
 
+/* 微調整: スマホでカレンダー全体が最初の画面に入るように（2026-11-18） */
+@media (max-width: 479px) {
+  .calendar-cell { min-height: 54px; padding: 3px; }
+  .day-count-wrap { margin-top: 3px; }
+  .day-count-pill { line-height: 1.4; }
+  .hero-band { padding-bottom: 14px; }
+  .calendar-nav h2 { padding-top: 5px; padding-bottom: 5px; }
+  .calendar-nav { margin-bottom: 2px; }
+  .calendar-hint { margin-bottom: 6px; }
+}
+
+
+/* ===== プレビュー追加分: イベント一覧（画像） ===== */
+.preview-banner {
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 12px;
+  letter-spacing: 0.02em;
+}
+.gallery-grid { columns: 2; column-gap: 14px; }
+@media (min-width: 720px) { .gallery-grid { columns: 3; } }
+.gallery-card { break-inside: avoid; margin-bottom: 18px; cursor: pointer; }
+.gallery-img { display: block; width: 100%; height: auto; border-radius: 10px; }
+.gallery-noimg { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: var(--color-primary-subtle); color: var(--color-text-muted); font-size: 12px; border-radius: 10px; }
+.gallery-area { display: inline-block; margin-top: 8px; background: #1e4257; color: #fff; font-size: 11px; font-weight: 700; line-height: 1.6; padding: 1px 9px; border-radius: 999px; }
+.gallery-title { margin-top: 5px; font-size: 14px; font-weight: 700; line-height: 1.5; color: var(--color-text); }
+.gallery-date { margin-top: 3px; font-size: 12px; color: var(--color-text-muted); }
+.gallery-date .num { font-size: 14px; font-weight: 700; }
+.gallery-date .unit { font-size: 10.5px; }
+
 </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="icon" href="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/icon-192.png" type="image/png" sizes="192x192">
@@ -2170,6 +2194,10 @@ button:active, .map-day-row:active { transform: scale(0.95); }
       <li><button class="drawer-item" data-action="agenda">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         イベント一覧（リスト）
+      </button></li>
+      <li><button class="drawer-item" data-action="gallery">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        イベント一覧（画像）
       </button></li>
       <li class="drawer-section-label">益田市近隣のニュース</li>
       <li><button class="drawer-item drawer-item--sub" data-action="news-scroll" data-area="all">
@@ -2340,6 +2368,20 @@ button:active, .map-day-row:active { transform: scale(0.95); }
         </button>
       </div>
       <div id="agenda-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- イベント一覧（画像） -->
+  <div id="gallery-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="gallery-modal-title">
+    <div class="modal-overlay" id="gallery-modal-overlay"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="gallery-modal-title" class="modal-title">イベント一覧（画像）</h2>
+        <button class="modal-close" id="gallery-modal-close" aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="gallery-body" class="modal-body"></div>
     </div>
   </div>
 
@@ -4092,6 +4134,90 @@ function renderAgenda() {
 }
 
 // ===================================================================
+//  イベント一覧（画像）
+// ===================================================================
+function openGalleryModal() {
+  renderGallery();
+  document.getElementById('gallery-modal').hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeGalleryModal() {
+  document.getElementById('gallery-modal').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function galleryDateLabel(ev) {
+  const f = ds => {
+    const p = ds.split('-').map(Number);
+    const dow = '日月火水木金土'[new Date(p[0], p[1] - 1, p[2]).getDay()];
+    return '<span class="num">' + p[1] + '</span><span class="unit">月</span><span class="num">' + p[2] + '</span><span class="unit">日</span>（' + dow + '）';
+  };
+  if (ev.end_date && ev.end_date !== ev.date) {
+    const s = ev.date.split('-').map(Number), e = ev.end_date.split('-').map(Number);
+    if (s[0] === e[0] && s[1] === e[1]) {
+      const dow2 = '日月火水木金土'[new Date(e[0], e[1] - 1, e[2]).getDay()];
+      return f(ev.date) + '〜<span class="num">' + e[2] + '</span><span class="unit">日</span>（' + dow2 + '）';
+    }
+    return f(ev.date) + '〜' + f(ev.end_date);
+  }
+  return f(ev.date);
+}
+
+function renderGallery() {
+  const container = document.getElementById('gallery-body');
+  container.innerHTML = '';
+  const today = todayStr();
+  const evs = allEvents
+    .filter(ev => !ev.is_news && (ev.end_date || ev.date) >= today)
+    .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  if (evs.length === 0) {
+    container.innerHTML = '<p class="empty-msg">登録されているイベントはありません。</p>';
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'gallery-grid';
+  evs.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    const img = ev.images && ev.images.length ? ev.images[0] : ev.image_url;
+    if (img) {
+      const im = document.createElement('img');
+      im.className = 'gallery-img';
+      im.src = img;
+      im.alt = ev.title;
+      im.loading = 'lazy';
+      card.appendChild(im);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'gallery-noimg';
+      ph.textContent = '画像なし';
+      card.appendChild(ph);
+    }
+    const chip = document.createElement('span');
+    chip.className = 'gallery-area';
+    chip.textContent = townOf(ev);
+    card.appendChild(chip);
+    const title = document.createElement('div');
+    title.className = 'gallery-title';
+    title.textContent = ev.title;
+    card.appendChild(title);
+    const date = document.createElement('div');
+    date.className = 'gallery-date';
+    date.innerHTML = galleryDateLabel(ev);
+    card.appendChild(date);
+    card.addEventListener('click', () => { closeGalleryModal(); openDetailModal(ev.id); });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeGalleryModal(); openDetailModal(ev.id); }
+    });
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
+
+// ===================================================================
 //  モーダル・ドロワー・タブ リスナーセットアップ
 // ===================================================================
 function setupModalListeners() {
@@ -4133,6 +4259,8 @@ function setupModalListeners() {
         closeDrawer();
         if (btn.dataset.action === 'agenda') {
           openAgendaModal();
+        } else if (btn.dataset.action === 'gallery') {
+          openGalleryModal();
         } else if (btn.dataset.action === 'map') {
           openMapModal();
         } else if (btn.dataset.action === 'news-scroll') {
@@ -4153,6 +4281,8 @@ function setupModalListeners() {
   // アジェンダモーダル
   document.getElementById('agenda-modal-close').addEventListener('click', closeAgendaModal);
   document.getElementById('agenda-modal-overlay').addEventListener('click', closeAgendaModal);
+  document.getElementById('gallery-modal-close').addEventListener('click', closeGalleryModal);
+  document.getElementById('gallery-modal-overlay').addEventListener('click', closeGalleryModal);
 
   // 日付モーダル
   document.getElementById('day-modal-close').addEventListener('click', closeDayModal);
@@ -4183,6 +4313,7 @@ function setupModalListeners() {
       return;
     }
     if (!document.getElementById('agenda-modal').hidden) { closeAgendaModal(); return; }
+    if (!document.getElementById('gallery-modal').hidden) { closeGalleryModal(); return; }
     closeDetailModal();
     closeDayModal();
   });
