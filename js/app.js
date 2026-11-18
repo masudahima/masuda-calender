@@ -1494,6 +1494,90 @@ function renderAgenda() {
 }
 
 // ===================================================================
+//  イベント一覧（画像）
+// ===================================================================
+function openGalleryModal() {
+  renderGallery();
+  document.getElementById('gallery-modal').hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeGalleryModal() {
+  document.getElementById('gallery-modal').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function galleryDateLabel(ev) {
+  const f = ds => {
+    const p = ds.split('-').map(Number);
+    const dow = '日月火水木金土'[new Date(p[0], p[1] - 1, p[2]).getDay()];
+    return '<span class="num">' + p[1] + '</span><span class="unit">月</span><span class="num">' + p[2] + '</span><span class="unit">日</span>（' + dow + '）';
+  };
+  if (ev.end_date && ev.end_date !== ev.date) {
+    const s = ev.date.split('-').map(Number), e = ev.end_date.split('-').map(Number);
+    if (s[0] === e[0] && s[1] === e[1]) {
+      const dow2 = '日月火水木金土'[new Date(e[0], e[1] - 1, e[2]).getDay()];
+      return f(ev.date) + '〜<span class="num">' + e[2] + '</span><span class="unit">日</span>（' + dow2 + '）';
+    }
+    return f(ev.date) + '〜' + f(ev.end_date);
+  }
+  return f(ev.date);
+}
+
+function renderGallery() {
+  const container = document.getElementById('gallery-body');
+  container.innerHTML = '';
+  const today = todayStr();
+  const evs = allEvents
+    .filter(ev => !ev.is_news && (ev.end_date || ev.date) >= today)
+    .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  if (evs.length === 0) {
+    container.innerHTML = '<p class="empty-msg">登録されているイベントはありません。</p>';
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'gallery-grid';
+  evs.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    const img = ev.images && ev.images.length ? ev.images[0] : ev.image_url;
+    if (img) {
+      const im = document.createElement('img');
+      im.className = 'gallery-img';
+      im.src = img;
+      im.alt = ev.title;
+      im.loading = 'lazy';
+      card.appendChild(im);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'gallery-noimg';
+      ph.textContent = '画像なし';
+      card.appendChild(ph);
+    }
+    const chip = document.createElement('span');
+    chip.className = 'gallery-area';
+    chip.textContent = townOf(ev);
+    card.appendChild(chip);
+    const title = document.createElement('div');
+    title.className = 'gallery-title';
+    title.textContent = ev.title;
+    card.appendChild(title);
+    const date = document.createElement('div');
+    date.className = 'gallery-date';
+    date.innerHTML = galleryDateLabel(ev);
+    card.appendChild(date);
+    card.addEventListener('click', () => { closeGalleryModal(); openDetailModal(ev.id); });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeGalleryModal(); openDetailModal(ev.id); }
+    });
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
+
+// ===================================================================
 //  モーダル・ドロワー・タブ リスナーセットアップ
 // ===================================================================
 function setupModalListeners() {
@@ -1535,6 +1619,8 @@ function setupModalListeners() {
         closeDrawer();
         if (btn.dataset.action === 'agenda') {
           openAgendaModal();
+        } else if (btn.dataset.action === 'gallery') {
+          openGalleryModal();
         } else if (btn.dataset.action === 'map') {
           openMapModal();
         } else if (btn.dataset.action === 'news-scroll') {
@@ -1555,6 +1641,8 @@ function setupModalListeners() {
   // アジェンダモーダル
   document.getElementById('agenda-modal-close').addEventListener('click', closeAgendaModal);
   document.getElementById('agenda-modal-overlay').addEventListener('click', closeAgendaModal);
+  document.getElementById('gallery-modal-close').addEventListener('click', closeGalleryModal);
+  document.getElementById('gallery-modal-overlay').addEventListener('click', closeGalleryModal);
 
   // 日付モーダル
   document.getElementById('day-modal-close').addEventListener('click', closeDayModal);
@@ -1585,6 +1673,7 @@ function setupModalListeners() {
       return;
     }
     if (!document.getElementById('agenda-modal').hidden) { closeAgendaModal(); return; }
+    if (!document.getElementById('gallery-modal').hidden) { closeGalleryModal(); return; }
     closeDetailModal();
     closeDayModal();
   });
