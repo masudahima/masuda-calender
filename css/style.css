@@ -2141,3 +2141,10 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .gallery-date { margin-top: 3px; font-size: 12px; color: var(--color-text-muted); }
 .gallery-date .num { font-size: 14px; font-weight: 700; }
 .gallery-date .unit { font-size: 10.5px; }
+
+/* ===== このサイトについて（トップ下部・静的テキスト） ===== */
+.site-about { margin-top: 56px; }
+.site-about-title { font-size: 16px; font-weight: 700; color: var(--color-text); margin-bottom: 12px; }
+.site-about p { font-size: 13.5px; line-height: 1.9; color: var(--color-text-muted); margin-bottom: 10px; }
+.site-about a { color: var(--color-primary); }
+.site-about-links { margin-top: 2px; }
