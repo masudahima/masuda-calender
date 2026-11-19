@@ -1304,6 +1304,13 @@ async function openDetailModal(id) {
   shareBtn.addEventListener('click', () => shareEvent(ev));
   body.appendChild(shareBtn);
 
+  // 個別ページへのリンク（静的ページ版）
+  const pageLink = document.createElement('a');
+  pageLink.className = 'detail-page-link';
+  pageLink.href = `${ev.is_news ? 'news' : 'event'}/${ev.date}-${ev.id.slice(0, 8)}.html`;
+  pageLink.textContent = 'ページで見る';
+  body.appendChild(pageLink);
+
   // 管理ボタン（ログイン中のみ）
   const sess = await supabaseClient.auth.getSession();
   if (sess?.data?.session) {

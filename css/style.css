@@ -2148,3 +2148,6 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 .site-about p { font-size: 13.5px; line-height: 1.9; color: var(--color-text-muted); margin-bottom: 10px; }
 .site-about a { color: var(--color-primary); }
 .site-about-links { margin-top: 2px; }
+
+/* 詳細モーダル内の個別ページリンク */
+.detail-page-link { display: block; text-align: center; margin-top: 10px; font-size: 13px; color: var(--color-text-muted); text-decoration: underline; }
