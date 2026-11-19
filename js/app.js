@@ -143,21 +143,26 @@ function occursOnDate(ev, dateStr) {
   return true;
 }
 
-// 「水曜日は休館日です」を赤字で目立たせる（2026-11-02 ユーザー希望）
+// 「水曜日は休館日です」と中止のお知らせを赤字で目立たせる（2026-11-02／2026-11-19 ユーザー希望）
 // 本文中のURLはタップできるリンクにする（2026-11-09 ユーザー希望）
 function appendCommentText(el, text) {
-  const TARGET = '水曜日は休館日です';
+  const TARGETS = ['水曜日は休館日です', '【中止のお知らせ】', '中止になりました'];
   const appendPlain = (str) => {
     let rest = String(str || '');
     while (rest.length > 0) {
-      const i = rest.indexOf(TARGET);
-      if (i === -1) { el.appendChild(document.createTextNode(rest)); break; }
-      if (i > 0) el.appendChild(document.createTextNode(rest.slice(0, i)));
+      let hit = null;
+      let hitIdx = -1;
+      for (const t of TARGETS) {
+        const i = rest.indexOf(t);
+        if (i !== -1 && (hitIdx === -1 || i < hitIdx)) { hit = t; hitIdx = i; }
+      }
+      if (hit === null) { el.appendChild(document.createTextNode(rest)); break; }
+      if (hitIdx > 0) el.appendChild(document.createTextNode(rest.slice(0, hitIdx)));
       const s = document.createElement('span');
       s.className = 'text-alert';
-      s.textContent = TARGET;
+      s.textContent = hit;
       el.appendChild(s);
-      rest = rest.slice(i + TARGET.length);
+      rest = rest.slice(hitIdx + hit.length);
     }
   };
   const src = String(text || '');
