@@ -33,15 +33,30 @@
   .btn-back { background: #232a5e; color: #fff; }
   .foot { text-align: center; font-size: 12px; color: #8a8f7a; margin-top: 18px; line-height: 1.8; }
 
-  body { background: #fdf3f6; }
-  .card { border-color: #e58bb1; box-shadow: 6px 6px 0 #fbd3e4; border-radius: 26px; }
-  h1 { color: #b03a6b; }
-  h2 { border-left-color: #f28bb4; color: #b03a6b; }
-  h2::before { content: '♡ '; color: #f28bb4; }
-  .info { background: #fff0f6; }
-  .info b { color: #b03a6b; }
-  .article-img { background: #fde7f1; }
-  .btn-main { background: #e58bb1; }
+  body { background: #fff8ea; color: #4a4238; }
+  .band { background: linear-gradient(180deg, #bfe6f7 0%, #eaf7ff 55%, #fff8ea 100%); }
+  .band .site { color: #3d5a73; }
+  .band .sub { color: #7a8a99; }
+  .card { background: #fffef9; border: none; border-radius: 28px; box-shadow: 0 10px 30px rgba(180, 150, 90, .18); padding: 26px 20px 26px; }
+  .card > .chip { display: block; width: fit-content; margin: 0 auto; }
+  h1 { color: #4a3f35; text-align: center; margin: 14px 0 16px; }
+  .lead { text-align: left; }
+  .body p { line-height: 2.05; }
+  h2 { border-left: none; border-radius: 999px; padding: 10px 18px; color: #4a3f35; margin: 28px 0 14px; box-shadow: 0 3px 8px rgba(180, 150, 90, .15); }
+  .body h2:nth-of-type(1) { background: #ffe9a8; }
+  .body h2:nth-of-type(2) { background: #cdeffd; }
+  .body h2:nth-of-type(3) { background: #d9f2e2; }
+  .body h2:nth-of-type(4) { background: #ffdcc7; }
+  .body h2:nth-of-type(5) { background: #e6defc; }
+  .spec { margin: 12px 0 18px; background: #fff8ea; border-radius: 16px; padding: 12px 14px; }
+  .spec div { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; line-height: 1.7; align-items: flex-start; }
+  .spec b { flex: 0 0 68px; background: #fff; border: 2px solid #ffd98a; color: #8a6d1f; border-radius: 999px; text-align: center; font-size: 12px; padding: 2px 0; }
+  .info { background: #fff3cf; }
+  .info b { color: #8a6d1f; }
+  .article-img { background: #fdf1d7; border-radius: 20px; }
+  .article-img img { border-radius: 14px; }
+  .btn-main { background: #ffb84d; color: #664d03; box-shadow: 0 4px 0 #f09c1f; }
+  .btn-back { background: #5b8fb9; }
 </style>
 </head>
 <body>
@@ -52,31 +67,58 @@
   <div class="wrap">
     <div class="preview-note">これはプレビューです。本番のサイトではありません</div>
     <article class="card">
-      <span class="chip" style="background:#c2185b">LOKA HORNのInstagram</span>
+      <span class="chip" style="background:#ef9f27">LOKA HORNのInstagram</span>
       <h1>益田・津和野の子育て支援センターまとめ</h1>
       <div class="body">
-        <p class="lead">子育て支援センターは、未就学の子どもと保護者が無料で遊べて、子育ての相談もできる場所です。<br>益田市と津和野町のセンターをまとめました。</p>
+        <p class="lead">子育て支援センターは、未就学の子どもと保護者が無料で遊べて、子育ての相談もできる場所です。益田市と津和野町のセンターをまとめました。</p>
         <figure class="article-img"><img src="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/article-kosodate-hero.jpg" alt=""></figure>
         <h2>益田市立子育て支援センター（益田市）</h2>
         <p>益田市常盤町にある、市立の子育て支援センターです。</p>
-        <p>行事がない日は9時から17時まで、ホールや園庭で自由に遊ぶことができます。<br>おもちゃもたくさんあり、広い園庭もあります。<br>利用できるのは未就学児のみです。</p>
-        <p>子育てに関する相談もできます。<br>一般の来所・電話相談は火曜日から日曜日の9時から17時まで（祝日・年末年始を除く）で、保育士などのセンタースタッフが対応します。<br>助産師・栄養士・保健師による専門相談日もあります。</p>
-        <p>場所：益田市常盤町11番1号<br>電話：0856-22-2851<br>開所：火〜日 9:00〜17:00（月曜・祝日・年末年始はお休み）<br>益田駅から車で約5分<br>利用は無料</p>
+        <p>行事がない日は9時から17時まで、ホールや園庭で自由に遊ぶことができます。おもちゃもたくさんあり、広い園庭もあります。利用できるのは未就学児のみです。</p>
+        <p>子育てに関する相談もできます。一般の来所・電話相談は火曜日から日曜日の9時から17時まで（祝日・年末年始を除く）で、保育士などのセンタースタッフが対応します。助産師・栄養士・保健師による専門相談日もあります。</p>
+        <div class="spec">
+          <div><b>場所</b><span>益田市常盤町11番1号</span></div>
+          <div><b>電話</b><span>0856-22-2851</span></div>
+          <div><b>開所</b><span>火〜日 9:00〜17:00（月曜・祝日・年末年始はお休み）</span></div>
+          <div><b>アクセス</b><span>益田駅から車で約5分</span></div>
+          <div><b>料金</b><span>無料</span></div>
+        </div>
         <h2>日原子育て支援センター（津和野町）</h2>
-        <p>日原保育園の中にある支援センターです。<br>親子でゆったり楽しく過ごせるよう、毎月さまざまな行事が計画されています。</p>
-        <p>場所：津和野町日原22番地1<br>電話：0856-74-0742<br>開所：月〜金 9:00〜15:30（祝日・年末年始・お盆を除く）※月2回、土曜日も開所<br>津和野駅から車で約20分<br>利用は無料</p>
+        <p>日原保育園の中にある支援センターです。親子でゆったり楽しく過ごせるよう、毎月さまざまな行事が計画されています。</p>
+        <div class="spec">
+          <div><b>場所</b><span>津和野町日原22番地1</span></div>
+          <div><b>電話</b><span>0856-74-0742</span></div>
+          <div><b>開所</b><span>月〜金 9:00〜15:30（祝日・年末年始・お盆を除く）※月2回、土曜日も開所</span></div>
+          <div><b>アクセス</b><span>津和野駅から車で約20分</span></div>
+          <div><b>料金</b><span>無料</span></div>
+        </div>
         <h2>子育てふれあいルーム ぶどうの木（津和野町）</h2>
         <p>津和野幼花園の中にある、子育てふれあいルームです。</p>
-        <p>場所：津和野町後田ロ66番地<br>電話：0856-72-0218<br>開所：火〜金 9:30〜15:30（祝日・年末年始・お盆を除く）<br>津和野駅から車で約3分<br>利用は無料</p>
+        <div class="spec">
+          <div><b>場所</b><span>津和野町後田ロ66番地</span></div>
+          <div><b>電話</b><span>0856-72-0218</span></div>
+          <div><b>開所</b><span>火〜金 9:30〜15:30（祝日・年末年始・お盆を除く）</span></div>
+          <div><b>アクセス</b><span>津和野駅から車で約3分</span></div>
+          <div><b>料金</b><span>無料</span></div>
+        </div>
         <h2>屋外型子育て拠点 でこぼこ広場（津和野町）</h2>
-        <p>山のこども園うしのしっぽの隣にある、屋外型の子育て拠点です。<br>水曜日は旧左鐙小学校が会場になります。</p>
-        <p>場所：津和野町左鐙1476番地<br>電話：0856-76-0180<br>開所：火〜金 9:30〜15:00（祝日・年末年始・お盆を除く）※月1回、土曜日も開所<br>津和野駅から車で約35分<br>利用は無料</p>
+        <p>山のこども園うしのしっぽの隣にある、屋外型の子育て拠点です。水曜日は旧左鐙小学校が会場になります。</p>
+        <div class="spec">
+          <div><b>場所</b><span>津和野町左鐙1476番地</span></div>
+          <div><b>電話</b><span>0856-76-0180</span></div>
+          <div><b>開所</b><span>火〜金 9:30〜15:00（祝日・年末年始・お盆を除く）※月1回、土曜日も開所</span></div>
+          <div><b>アクセス</b><span>津和野駅から車で約35分</span></div>
+          <div><b>料金</b><span>無料</span></div>
+        </div>
         <figure class="article-img"><img src="https://mrscrbscfktbcpgvajmc.supabase.co/storage/v1/object/public/event-images/article-kosodate-outdoor.jpg" alt="" loading="lazy"></figure>
         <h2>ホルンの子育て支援センター（津和野町）</h2>
         <p>2026年度からは、カフェ＆美容室「サロンホルン」のグループ「LOKA HORN」も、津和野町の子育て支援センターの運営を町から委託されて担っています。</p>
-        <p>下はカフェになっていて、支援センターは隣の部屋です。<br>カフェのご飯を、支援センターの部屋で食べることもできます。</p>
-        <p>家庭的保育の「KODOMO HORN」もあります。<br>詳しくはLOKA HORNのInstagramで確認してください。</p>
-        <p>津和野駅から車で約3分<br>利用は無料</p>
+        <p>下はカフェになっていて、支援センターは隣の部屋です。カフェのご飯を、支援センターの部屋で食べることもできます。</p>
+        <p>家庭的保育の「KODOMO HORN」もあります。詳しくはLOKA HORNのInstagramで確認してください。</p>
+        <div class="spec">
+          <div><b>アクセス</b><span>津和野駅から車で約3分</span></div>
+          <div><b>料金</b><span>無料</span></div>
+        </div>
       </div>
       <div class="info">
         <div><b>出典：</b>益田市・津和野町の公式ホームページ（2026年11月確認）</div>
