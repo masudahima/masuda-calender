@@ -2151,3 +2151,13 @@ button:active, .map-day-row:active { transform: scale(0.95); }
 
 /* 詳細モーダル内の個別ページリンク */
 .detail-page-link { display: block; text-align: center; margin-top: 10px; font-size: 13px; color: var(--color-text-muted); text-decoration: underline; }
+
+/* 子育て支援センターバナー */
+.kosodate-section{margin:18px 0 6px}
+.kosodate-card{display:flex;gap:12px;align-items:center;background:#fffdf6;border:2px solid #232a5e;border-radius:20px;box-shadow:6px 6px 0 #bfe8d2;padding:12px;text-decoration:none;color:inherit}
+.kosodate-img{flex:0 0 38%;background:#f3ead8;border-radius:14px;padding:6px}
+.kosodate-img img{display:block;width:100%;height:auto;border-radius:9px}
+.kosodate-body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.kosodate-title{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:#232a5e;line-height:1.45}
+.kosodate-text{font-size:12.5px;line-height:1.7;color:#3c415e}
+.kosodate-more{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;color:#2d6a4f}
